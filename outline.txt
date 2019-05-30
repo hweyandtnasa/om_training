@@ -1,0 +1,236 @@
+###############################################################
+Day 1
+###############################################################
+
+OpenMDAO is a software library that makes specializes in making it easier to apply numerical optimization to engineering analyses! 
+    - Specializing in gradient based optimization because typically dealing with large problems 
+    - Does support gradient free optimization and DOE, but those techniques don't scale well to large design spaces
+
+Though formal optimization theory is quite old, what we think of today as "optimization" is a fairly young discipline that emerged roughly in sync with the development of general purpose computing. 
+    - 1857: J. W. Gibbs shows that chemical equilibrium is attained when the energy is a minimum
+    - 1939: William Karush derives the necessary conditions for the inequality constrained problem in his Masters thesis. Harold Kuhn and Albert Tucker rediscover these conditions an publish their seminal  
+            paper in 1951. These became known as the Karush–Kuhn–Tucker (KKT) conditions.
+    - 1959: Davidon develops the first quasi-Newton method for solving nonlinear optimization prob- lems. Fletcher and Powell publish further developments in 1963.
+    - 1963: Wilson invents the sequential quadratic programming method for the first time. Han re-
+            invents it in 1975 and Powell does the same in 1977.
+    - 1977: Raphael Haftka publishes one of the first multidisciplinary design optimization (MDO) ap- plications, 
+            in a paper entitled “Optimization of flexible wing structures subject to strength and induced drag constraints” [2].
+    - 1985: The first conference in MDO, the Multidisciplinary Analysis and Optimization (MA&O) conference, takes place.
+
+
+Optimizers deal with under-defined systems of equations (more unknowns and equations)
+    - Example: Find the angle of attack and chord length needed to get a Cl=0.5 for a NACA 0012 airfoil
+
+    - You use an objective function (measure of goodness) to convert the under-defined problem into a well-defined one. 
+    - Gradient based optimizers convert the well-defined problem into a form that can be solved by nonlinear solvers 
+
+Nonlinear solvers find solutions to well defined **implicit functions** of one or more variables
+        - You're obviously very familiar with explicit functions: f = F(x)
+        - You've almost certainly worked with some implicit functions too: R(x,y) = 0
+
+You can change any explicit function into an implicit form: 
+    - y = F(x) = 3x**2 - ln(x)
+    - 0 = R(x,y) = 3x**2 - ln(x) - y = R(x,y)
+
+"Well-defined" means that there are the same number of unknowns (state variables) as there are residuals to constrain them
+        - R(x,y) = 0
+        - `x` can be any size you want, but its value is fixed for the whole solve 
+        - R is a vector-valued function that is the same length as `y` (the state vector array)
+
+The Mach-Area relationship from compressible flow can be either explicit or implicit! 
+    - Explicit when solving for A/A* as a function of MN: 
+    - Implicit when solving for MN as a function of area ratio: R(A/A*, MN) = 0
+
+Lets solve the implicit Mach->Area relationship with a nonlinear solver! 
+    - show how to do this in less than 10 lines of python code `scipy.optimize.newton`
+
+We used using Newton's method: general purpose nonlinear solver algorithm that iterative solves a linearized problem built from partial derivatives
+    - give newton's method equations (requires partial derivatives!)
+    - highlight that the linear model is made from the partial derivative jacobian
+    - NOTE: Newton's method only requires partial derivatives of the residual function! 
+
+There lots of different ways to compute the partial derivatives! 
+    - FD, CS (numerical approximations)
+    - Hand Differentiation 
+    - Symbolic Differentiation (Wolfram Alpha/SymPy)
+    - Algorithmic Differentiation
+
+Engineers commonly use forward or backward FD because it's simple ... 
+    - Show the first order FD equations
+    - subtractive cancellation limits how small of an eps we can use! 
+    - Note: 1 extra function call per variable you want to differentiate with respect to
+
+Central Difference gives better accuracy for same eps, but doubles the computational cost 
+    - show the central difference equations
+    - eps still limited by subtractive cancellation!
+    - Note: 2 extra function calls per variable you want to differentiate with respect to
+
+*** backup material we maybe won't cover, but should make them aware of it
+Complex Step is a really nice alternative technique, and its pretty easy to use with python, matlab, and fortran! 
+    - give the complex-step derivation (but don't actually go through it in class)
+    - Note: 1 extra function call with complex input per variable you want to differentiate with respect to (roughly 2.5x more expensive than real inputs)
+***
+
+Sometimes an implicit function can masquerade as an explicit function 
+    - perhaps you would have written the implicit function in an explicit form? MN = \hat{F}(A/A*)? 
+    - You're hiding the nonlinear solver in \hat{F} by wrapping a "black-box" around the call to scipy.optimize.newton to make it seem like there is a direct relationship
+    - The implicitness isn't gone, its just hidden. It sill effects things
+
+What if you tried to finite-difference across a seemingly explicit function that was really implicit internally? 
+    - potential sources of error: inherant FD error, also noise from the solver tolerance? 
+    - Show plot of derivative approximation for mach-area relationship vs solver tol? 
+    - **maybe just pull from chem-eq paper ... Show a plot of FD accuracy from chem-eq paper? (link back to gibbs free energy ideas)
+
+FD is simple, but it's also slow an inaccurate. We can do much better with analytic derivatives, but it does take more work
+    - We can take the derivatives of the residual for the Mach-area residual by hand
+        - show equation
+
+What if you want to compute an analytic derivative for d(Mach)/d(Area) (so you don't suffer the problems of FD)
+    - Start with R(MN, A) = 0. total deriv of R wrt A. solve for d(Mach)/d(Area) 
+    - Note: There are multi-variables versions of this technique called the direct and adjoint methods
+
+
+** Transition slide ** "Ok,  now that you know about nonlinear solvers we're ready to talk more about optimizers"
+
+To analytically optimize a function, you set its derivative equal to 0! 
+    - You have two variables (X1 and X2) that you want to know the values of, but 0 equations to constrain them! 
+    - Define an (explicit) objective function f(x1, x2) = (3(x2+1)**2 + ln(x2))
+    - We know that we'll find a minima when df/dx2 = 0 and when df/dx2 = 0
+    - So now we have two equations and two unkowns! we can solve that with a nonlinear solver! 
+
+The transformation from under-defined to well-defined requires taking derivatives of the objective function! 
+    - If your objective function comes from practically any kind of engineering analysis, then that means your objective function is implicit!
+    - You might not have thought about it before, but just about all engineering analyses use linear or nonlinear solvers (FEA, CFD, cycle analysis)
+    - So taking derivatives of these engineering objective functions requires direct or adjoint analytic derivatives!
+
+
+This is where OpenMDAO comes in. It solves for the analytic derivatives automatically and gives them to the optimizer! 
+
+
+**Lab assignment: write your own newton's method solver for a general function handle and partial derivative function handle (pure python script, no OpenMDAO)
+    - Solve for Mach Number as a function of Area ratio
+    - Solve some two or three variable system of equations
+    - compare your solver to some of the methods in scipy.root
+    - competition: I'll run your solver with my own function and we'll see who's can solve it the fastest! 
+    ** extra-credit: make your newton solver complex-stepable and compare the performance when you numerically approximate derivatives across the nonlinear solve
+
+
+###############################################################
+Day 2
+###############################################################
+
+In OpenMDAO you build models with `Component`, organize them with `Group`, and run them with `Problem` and `Driver` 
+    - TLDR code from getting-started
+
+OpenMDAO Docs are organized two parts: 
+    - User Guide is a series of tutorials that are meant to be worked through in order. These introduce core concepts and provide you a good frame of reference to build from
+
+    - Reference Guide: mean to serve as a reference for every-day use
+        - Walk them through features, examples, theory guide section
+
+The OpenMDAO Component Library: 
+    - ExecComp is super useful! 
+    - Linear System Comp
+    - AkimaSplineComp
+    - BsplineComp
+
+
+** transition slide** "Working with components" 
+
+
+Inherit from `ExplicitComponent` when you want to implement an explicit function
+    - Paraboloid example
+    - setup()
+        - add_input()
+        - add_output()
+    
+    - compute()
+
+    - compute_partials()
+
+You can run this component by itself in a `Problem`
+    - simple run script example
+
+
+Inherit from `ImplicitComponent` when you want to implement an implicit function
+
+    - implicit paraboloid example
+
+    - setup()
+    - apply_nonlinear()
+    - linearize()
+
+    - **NOTE: need a nonlinear solver. use newton! 
+
+You can also run this component by itself in a `Problem`, but now you need to use a nonlinear solver with it
+    - simple run script
+
+
+** transition slide** Working with Groups
+
+Most models are composed of more than one component! 
+    - Sellar XDSM 
+    - Sellar is an simple coupled model built from two explicit components (disciplines)
+
+Implement the two disciplines in a new file: `sellar_disciplines.py`
+    - code! 
+
+Make a new file to combine the two disciplines together with a `Group` and connect them together 
+    - Can connect them with promotion or explicit connection
+    - connections always go from output (source) to (input)
+    - show code example for each 
+
+Put your `SellarGroup` into a `Problem` look at connections with the N2 viewer
+    - IndepVarComp was added to set the values for X,Z
+
+
+Notice the cycle in the data connections? This is what we mean by ``coupling``
+    - even though each component is explicit, you've created an implicit model by coupling it! 
+    - since its implicit we'll need to use a solver to converge the group
+
+
+OpenMDAO has lots of solvers in the standard library. 
+    - NonlinearRunOnce (forward substitution)
+    - NonlinearBlockGS (derivative free)
+    - Broyden (Derivative free Quasi-Newton Method)
+    - NewtonSolver 
+
+Since we defined the derivatives, we'll use a NewtonSolver 
+    - Code! 
+
+`list_outputs` and `list_inputs` are helpful for debugging
+    - output for sellar
+
+
+You can optimize the sellar problem with the `ScipyOptimizeDriver` 
+    - code! 
+
+You save the optimization history with a CaseRecorder
+    - save less information for each iteration 
+    - prob.record_iteration('final') to save everything 
+
+** Lab Assignment: 
+    1) Try out a few different optimization algorithms from scipy on sellar. Plot the convergence history of the DVs and Objectives for each one
+    2) Go into the Feature Docs, ``working with derivatives'' section and find out how to use full-model finite difference. 
+       Investigate the performance of SLSQP with model level FD for different solver tolerances
+
+    ** extra credit Implement the multidimentional rosenbrock function, and investigate how gradient-based vs gradient free methods scale with increasing number of design variables
+
+
+
+###############################################################
+Day 3 
+###############################################################
+
+Lets build a simple node-voltage analysis for a DC electrical circuit, using a mix of Implicit and Explicit Components
+
+
+
+
+
+
+
+
+
+
+
