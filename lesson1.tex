@@ -466,9 +466,38 @@
 
     The trick of re-arranging terms to form an implicit version from explicit function works for any general function.
     Hence we can generally say that all explicit functions have an implicit form, but not all implicit functions have an explicit form. 
-    We're discussing this subtlety because internally and out of site from the users, OpenMDAO represents all functions in their implicit form. 
-    Although, as a user you don't need to worry about this transformation --- it is managed automatically for you --- the fact that it occurs becomes relevant when trying to understand how OpenMDAO computes derivatives across complex models.  
+    We're discussing this subtlety because internally and out of sight from the users, OpenMDAO represents all functions in their implicit form. 
+    As a user you don't need to worry about this transformation --- it is managed automatically for you --- but the fact that it occurs becomes relevant when trying to understand how OpenMDAO computes derivatives across complex models.  
     So we'll revisit this subject a bit later. 
+
+
+    \subsubsection{Disguising an implicit function as an explicit one}
+    Of more direct relevance to you as a user is that you can disguise an implicit function in an explicit form. 
+    To be perfectly clear, this is \textbf{not} the same thing as converting an implicit function into an equivalent explicit form! 
+
+    The word ``disguise'' is used very intentionally here. What you can do is put a black-box wrapper around an implicit function to make it look like an explicit one, even though the internal calculation is still being performed in an implicit way. 
+
+    Lets go back to our example to see this in action, solving for Mach number when given an area ratio. 
+    The implicit form is given in by Equation~\ref{eq:implicit_mach_area}. 
+    We're \textbf{not} going to change that at all. 
+    However, if look at the code in Figure~\ref{eq:implicit_mach_area} you see that we can get solutions with a single call to the `newton' method. 
+    Now, with a few more lines of code, we can wrap that whole process up into something that looks like a regular explicit function, as shown in Figure~\ref{fig:mach-area-fake-explicit}. 
+    \begin{figure}[H]
+        \centering
+        \lstinputlisting[language=Python]{mach_area_fake_explicit.py}
+        \caption{Disguising an implicit function with an explicit wrapper}
+        \label{fig:mach-area-fake-explicit}
+    \end{figure}
+
+    Even though the functions look explicit now, they aren't really. 
+    Why does this matter? 
+    For one thing, if the function was really explicit then you would expect to be able to give it any allowable value for area ratio --- anything over 1.0 --- and expect to get an answer back. 
+    However, if you experiment a bit with that function you'll see that the nonlinear solver isn't that stable. 
+    It gets an answer for $A/A^*=3.0$, but not for $A/A^*=2.5$. 
+    A second reason, which is especially important in the context of optimization, is that the way in which you need to compute derivatives across the function changes because of the implicitness. 
+    We'll talk about this in more detail in the next sections. 
+
+
 
 
     % \subsection{Using Newton's method to solve implicit functions}
@@ -495,8 +524,13 @@
     %     \right] 
     % \end{equation}
 
+    \subsection{Numerical approximation of derivatives of outputs of implicit functions}
+    Numerical approximation of derivatives is by far the most common approach used by engineers in practice. 
+    Most optimizers and solvers that require derivative information come with built in numerical approximation methods to use by default. 
+    The primary advantage of these numerical approximations is that they are very easy to implement.
+    The primary disadvantage is that they are expensive and in accurate. 
 
-    \subsection{Taking derivatives of outputs from implicit functions}
+    \subsection{Computing analytic derivatives of outputs of implicit functions}
 
     Given an implicit function how can you compute derivatives of the implicit outputs with respect to the inputs? 
     For a general implicit function, given by $R(x,y)=0$, we are talking about $dy/dx$. 
