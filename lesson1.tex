@@ -524,11 +524,71 @@
     %     \right] 
     % \end{equation}
 
-    \subsection{Numerical approximation of derivatives of outputs of implicit functions}
+    \subsection{Numerical approximation of derivatives}
     Numerical approximation of derivatives is by far the most common approach used by engineers in practice. 
     Most optimizers and solvers that require derivative information come with built in numerical approximation methods to use by default. 
     The primary advantage of these numerical approximations is that they are very easy to implement.
-    The primary disadvantage is that they are expensive and in accurate. 
+    The primary disadvantage is that they are expensive and can be very accurate. 
+
+    The first order forward difference approximation is given by: 
+    \begin{equation}
+        \frac{dF}{dx} \approx \frac{F(x+\epsilon) - F(x)}{\epsilon}
+    \end{equation}
+    This can be derived by looking at a Taylor expansion of $F(x)$
+    \begin{align}
+        F(x+\epsilon) &= F(x) + \frac{dF}{dx}\epsilon + \frac{d^2F}{dx^2}\epsilon^2 + ... \\
+        \frac{dF}{dx}\epsilon &= F(x+\epsilon) - F(x) - \frac{d^2F}{dx^2}\epsilon^2 - ... \\
+        \frac{dF}{dx} &= \frac{F(x+\epsilon) - F(x)}{\epsilon} - \frac{d^2F}{dx^2}\epsilon \\
+        \frac{dF}{dx} &\approx \frac{F(x+\epsilon) - F(x)}{\epsilon}
+    \end{align}
+    In the last step, we neglect any terms multiplied by $\epsilon$ because it is small so we can assume that these terms are insignificant. 
+    Thus we get an approximation for the derivative with error that varies with directly $\epsilon$. 
+    This is why its called a first-order approximation. 
+
+    You have to compute this approximation once for every variable that you want to take a derivative with respect to. 
+    So the compute cost scales linearly with the number of input variables you're considering. 
+
+    What about accuracy?
+    In theory, you can just take $\epsilon$ to be really tiny and we can get a very accurate derivative approximation. 
+    In practice though, we run into a problem when $\epsilon$ gets too small.
+    Lets look a a simple explicit example function: $sin(x)$ at $x=\pi/4$.
+    If we look at a sweep of step sizes from $10^{-2}$ to $10^{-15}$, and compare the FD approximation to the analytic answer ($cos(x)$), 
+    then the relative error follows the trend shown in Figure~\ref{fig:fd_subtractive_cancellation}.
+    \begin{figure}[H]
+        \centering
+        \lstinputlisting[language=Python]{sin_fd.py}
+        \includegraphics[width=.75\textwidth]{sin_fd.pdf}
+        \caption{Relative error of the first order FD approximation for $\frac{d sin(x)}{dx}$ vs step size ($\epsilon$)}
+        \label{fig:fd_subtractive_cancellation}
+    \end{figure}
+    Between $10^{-4}$ and about $10^{-8}$ we get the linear trend we expect --- the error is going down in direct proportion to the decrease in $\epsilon$. 
+    For step sizes smaller than $10^{-8}$ though, the error starts to climb and eventually gets quite large. 
+    The theory says the error should continue to decrease as $\epsilon$ decreases, 
+    but the code says that we're limited in precision after a certain point. 
+
+    Why is there a difference between pure theory and numerical reality? 
+    The discrepancy arises because computers use finite-precision math (i.e. floating point math), 
+    and this phenomenon is called subtractive cancellation. 
+    Essentially, because computers don't represent floating point numbers with infinite precision there is a limit to how small of difference they can resolve in two numbers. 
+
+    Practically, what this means is that there is always going to be a lower-limit on how accurate your numerical derivative approximation can be. 
+    The more non-linear the function the smaller the $\epsilon$ that you would need need in theory, but the subtractive cancellation phenomena is always going to prevent you from going to small. 
+
+    \subsubsection*{Can we do anything to get around subtractive cancellation?}
+
+    Yes! You have two options. 
+
+    1) Use a higher order FD approximation, like central-difference. 
+    This will give second-order convergence, which means that the error in the derivative will be proportional to $\epsilon^2$. 
+    In other words, for the same $\epsilon$ you get a much smaller error. 
+
+    2) Don't use subtraction! Seriously
+
+    Lets look at a slightly different 
+
+    %NOTE: lab assignment, compute the central difference FD approximation and 
+    %      complex-step approximation and plot the relative error on top of the forward difference. 
+
 
     \subsection{Computing analytic derivatives of outputs of implicit functions}
 
