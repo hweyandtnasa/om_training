@@ -536,9 +536,9 @@
     \end{equation}
     This can be derived by looking at a Taylor expansion of $F(x)$
     \begin{align}
-        F(x+\epsilon) &= F(x) + \frac{dF}{dx}\epsilon + \frac{d^2F}{dx^2}\epsilon^2 + ... \\
-        \frac{dF}{dx}\epsilon &= F(x+\epsilon) - F(x) - \frac{d^2F}{dx^2}\epsilon^2 - ... \\
-        \frac{dF}{dx} &= \frac{F(x+\epsilon) - F(x)}{\epsilon} - \frac{d^2F}{dx^2}\epsilon \\
+        F(x+\epsilon) &= F(x) + \frac{dF}{dx}\epsilon + \frac{1}{2}\frac{d^2F}{dx^2}\epsilon^2 + ... \\
+        \frac{dF}{dx}\epsilon &= F(x+\epsilon) - F(x) - \frac{1}{2}\frac{d^2F}{dx^2}\epsilon^2 - ... \\
+        \frac{dF}{dx} &= \frac{F(x+\epsilon) - F(x)}{\epsilon} - \frac{1}{2}\frac{d^2F}{dx^2}\epsilon \\
         \frac{dF}{dx} &\approx \frac{F(x+\epsilon) - F(x)}{\epsilon}
     \end{align}
     In the last step, we neglect any terms multiplied by $\epsilon$ because it is small so we can assume that these terms are insignificant. 
@@ -566,13 +566,13 @@
     The theory says the error should continue to decrease as $\epsilon$ decreases, 
     but the code says that we're limited in precision after a certain point. 
 
-    Why is there a difference between pure theory and numerical reality? 
+    Why is there a difference between theory and numerical reality? 
     The discrepancy arises because computers use finite-precision math (i.e. floating point math), 
     and this phenomenon is called subtractive cancellation. 
     Essentially, because computers don't represent floating point numbers with infinite precision there is a limit to how small of difference they can resolve in two numbers. 
 
     Practically, what this means is that there is always going to be a lower-limit on how accurate your numerical derivative approximation can be. 
-    The more non-linear the function the smaller the $\epsilon$ that you would need need in theory, but the subtractive cancellation phenomena is always going to prevent you from going to small. 
+    The more non-linear the function the smaller the $\epsilon$ that you would need need in theory, but the subtractive cancellation phenomena is always going to limit how small you can go. 
 
     \subsubsection*{Can we do anything to get around subtractive cancellation?}
 
@@ -582,24 +582,63 @@
     This will give second-order convergence, which means that the error in the derivative will be proportional to $\epsilon^2$. 
     In other words, for the same $\epsilon$ you get a much smaller error. 
 
-    2) Don't use subtraction! Seriously
+    2) Don't use subtraction! Seriously...
 
-    Lets look at a slightly different 
+    Lets look at a Taylor expansion for $F(x+\epsilon i)$ --- so we're looking at complex arithmetic now. 
+    \begin{align}
+        F(x+\epsilon) &= F(x) + \frac{dF}{dx}\epsilon i + \frac{1}{2}\frac{d^2F}{dx^2} (\epsilon i)^2 +  \frac{1}{6}\frac{d^3F}{dx^3} (\epsilon i)^3 + ... \\
+        F(x+\epsilon) &= F(x) + \frac{dF}{dx}\epsilon i - \frac{1}{2}\frac{d^2F}{dx^2} \epsilon^2 +  \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 i + ... \label{eq:complex_taylor}
+    \end{align}
+    Notice that in the right hand side of Equation~\eqref{eq:complex_taylor} some of the terms are real and some of the terms are complex. 
+    In particular, the second order term that includes $d^2F/dx^2$ is real and negative because $i^2=-1$.  
+    Similarly, the third order term is negative because $i^3=-i$.
+    We can split Equation~\eqref{eq:complex_taylor} into its real and imaginary parts: 
+    \begin{align}
+        Re[F(x+\epsilon)] &= F(x) - \frac{1}{2}\frac{d^2F}{dx^2} (\epsilon i)^2 + ... \\
+        Im[F(x+\epsilon)] &= \frac{dF}{dx}\epsilon -  \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 + ... \label{eq:im_complex_taylor}
+    \end{align}
+    Equation~\eqref{eq:im_complex_taylor} has the terms we need now. 
+    We just need to re-arrange them to solve for $\frac{dF}{dx}$ and discard any higher order terms: 
+    \begin{align}
+        \frac{dF}{dx}\epsilon  &= Im[F(x+\epsilon)] + \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 + ... \\
+        \frac{dF}{dx}  &= \frac{1}{\epsilon}Im[F(x+\epsilon)] + \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^2 + ... \\
+        \frac{dF}{dx}  &\approx \frac{1}{\epsilon}Im[F(x+\epsilon)] \label{eq:complex_step}
+    \end{align}
+    Equation~\eqref{eq:complex_step} is called the complex-step method. 
+    Notice that there is no subtraction at all here, so this method does not suffer from subtractive cancellation. 
+    This means that you can take very small steps in the complex plane and not suffer numerical lost of accuracy. 
+    Also, the largest term we discarded was on the order of $\epsilon^2$, so the complex-step method is second order accurate. 
+    These two things combined --- the lack of numerical issues and the second order convergence --- combine to make the complex-step method very accurate. 
+    If you take $\epsilon=1e-40$, we would typically consider the complex-step method to return a numerically exact derivative. 
+
+    Note that, similar to the FD calculations, you must still compute one additional function evaluation per design variable you want to differentiate with respect to. 
+    So the complex-step method has the same computational scaling as FD. 
+    Also note that in order to use the complex-step method, your code must support complex arithmetic. 
+    Python, Matlab, and Fortran all natively support complex arithmetic so complex-step is very easy to apply for those languages. 
+
+    One last thing to be aware of is that not all functions are implemented in a complex-step safe manner. 
+    For example, the \textit{np.linalg.norm} method does not work for complex-step correctly. 
+    So there are times when complex-step might not give an accurate answer if you have some non compatible functions in your code. 
+
 
     %NOTE: lab assignment, compute the central difference FD approximation and 
     %      complex-step approximation and plot the relative error on top of the forward difference. 
+    %      Now do the same thing for the implicit mach-area solve. What is different between FD over explicit and implicit and why? 
 
 
     \subsection{Computing analytic derivatives of outputs of implicit functions}
 
-    Given an implicit function how can you compute derivatives of the implicit outputs with respect to the inputs? 
-    For a general implicit function, given by $R(x,y)=0$, we are talking about $dy/dx$. 
+    If you don't want to use FD or complex-step methods, then your other option is analytic differentiation. 
+    For explicit functions, you know how to do this.
+    It's just a lot of basic calculus, algebra, and the chain-rule. 
+    However, if you want to analytically differentiate an implicit function things get a bit more interesting. 
+
+    For a general implicit function, given by $R(x,y)=0$, we seek $dy/dx$. 
     For example the in Equation~\eqref{eq:implicit_mach_area}, we are talking about $dMN/d\frac{A}{A^*}$. 
-    In either case, the answer is not strait forward. 
     The derivative in question is a total-derivative, which accounts for the change in the converged value of the implicit outputs with respect to changes in the inputs. 
     Since we have no analytic expression for the implicit outputs, there is nothing obvious to differentiate. 
 
-    So lacking any obvious path, lets just look at a total derivative of the implicit residual and see where it gets us: 
+    Lacking any obvious path... lets differentiate the only equation we have at hand, the residual equation: 
     \begin{equation}
         \frac{d R}{dx} = 0 = \frac{\partial R}{\partial x} + \frac{\partial R}{\partial y}\frac{dy}{dx}  \ . \label{eq:residual_total_deriv}
     \end{equation}
@@ -608,15 +647,18 @@
     That means that we are assuming that $R(x,y)=0$ is always true, and hence we know that its value is never changing and so its derivative must be 0. 
 
     Equation~\eqref{eq:residual_total_deriv} can be re-arranged to solve for $dy/dx$: 
-    \begin{equation}
-        \frac{dy}{dx} = - \left[\frac{\partial R}{\partial y}\right]^{-1} \frac{\partial R}{\partial x} \ . \label{eq:direct_deriv_solve}
-    \end{equation}
-
-    Lets examine this expression more closely. 
-    We see the quantity that we are looking for on the left-hand side, which is great. 
+    \begin{align}
+        \left[\frac{\partial R}{\partial y}\right] \frac{dy}{dx}& = - \frac{\partial R}{\partial x} \notag \\
+        \frac{dy}{dx} &= - \left[\frac{\partial R}{\partial y}\right]^{-1} \frac{\partial R}{\partial x} \ . \label{eq:direct_deriv_solve}
+    \end{align}
+    We now have a linear system of equations, the solution to which gives us $dy/dx$. 
+    Lets examine this linear system more closely. 
+    We see the quantity that we are looking for on the left-hand side of Equation~\eqref{eq:direct_deriv_solve}.
     On the right-hand side, there are two terms, both composed of partial derivatives of the residual function. 
     The $\partial R/\partial y$ term is a square matrix, of size $N_y \times N_y$. 
     Note that this is the same exact term that would be needed to implement Newton's method. 
+    Partial derivatives of the residual function are relatively easy to compute by hand, or they can even be approximated with FD or complex-step. 
+
     The $\partial R/\partial x$ term is of size $N_y \times N_x$. 
     So double checking the sizes in Equation~\eqref{eq:direct_deriv_solve} shows us that everything matches up and we get the correct size for the total derivative ($N_y \times N_x$): 
     \begin{equation}
@@ -625,6 +667,17 @@
         \underbrace{\frac{\partial R}{\partial x}}_{N_y \times N_x} \ . \label{eq:direct_deriv_solve}
     \end{equation}
 
+    What Equation~\eqref{eq:direct_deriv_solve} is telling us is that we can solve for one column of $dy/dx$ each time we solve that linear system. 
+    Each column corresponds to one of the input variables of the implicit function. 
+    If you can compute an explicit inverse of $\partial R/\partial y$, as shown in Equation~\eqref{eq:direct_deriv_solve},
+    Then each of these linear solves is little more than a simple matrix-vector product, which is very cheap. 
+    
+    However, for complex implicit functions like CFD or FEA analyses you might not be able (or at least might not want to) actually compute the inverse for $\partial R/\partial y$. 
+    In these cases, there are iterative linear solvers (e.g. Krylov methods) which can solve the linear system for you. 
+    These methods scale to the larger problems that a CFD solver poses, but they are also more expensive. 
+    In these cases, you can roughly approximate the cost of a linear solve to be the same as that of the non-linear solve. 
+    So in this situation, the computational scaling of this approach requires one linear solve per design variable which we are assuming to be roughly equivalent in cost to one nonlinear function evaluation. 
+    So this approach, similar to FD and complex-step methods, also scales linearly with the number of design variables. 
 
 
 
