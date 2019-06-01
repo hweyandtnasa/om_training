@@ -681,4 +681,43 @@
 
 
 
+    \section{Taking derivative of outputs of mixed implicit/explicit functions}
+
+    In real applications, your model is likely to be built from a mixture of implicit and explicit functions that are chained together.
+    A really simple example of this would be if you wanted to optimize the thickness distribution of a beam subject to an end load to minimize the average deflection of the beam as predicted by an FEA model. 
+    Admittedly, this is a silly optimization problem formulation. 
+    We know the answer here will simply be to pick the thickest structure allowed everywhere. 
+    But the purpose of the example is not to come up with a good optimization, but rather a simple mixed explicit/implicit function. 
+    Another example would be to minimize the thrust specific fuel consumption (TSFC) for a jet engine with respect to the design parameters of that engine cycle --- engine cycle analysis requires the solution to an implicit nonlinear system of equations to compute implicit outputs which are then fed into the TSFC calculation). 
+
+    So we want to minimize some objective function, $F(x,y)$, with respect to $x$ where $R(x,y)=0$. 
+    The objective function itself is a simple explicit function of $x,y$. 
+    But one of inputs to that function is the output of an implicit function, $y$. 
+    The optimizer is going to need $df/dx$, but how do we compute that? 
+
+    One option would be to use FD across the whole model. 
+    Lets call that the ``monolithic numerical approach'', because you are treating the entire model as a single monolithic function. 
+    In other words, you would be numerically computing derivatives of 
+    \begin{equation}
+        f= \hat{F}(x) \ .
+    \end{equation}
+    This is the approach that is most commonly taken by users of gradient based optimization. 
+    While it is easy to implement, the approach has some important downsides. 
+    Just as we discussed before, the computational scaling for this approach is bad if $x$ grows to be a large vector (if you have a fine mesh for your FEA for example). 
+    Lets assume we're willing to pay the computational cost though. 
+    Realizing that this monolithic function is actually an example of an implicit function disguised as an explicit one, 
+    we know that approximating derivatives if it with FD will be noisy at best and horribly wrong at worst. 
+    
+    So we need a better way. 
+    We could use complex-step to get better accuracy, if the code can handle complex arithmetic. 
+    That would be even more expensive than first order FD though, and not all engineering codes can handle complex arithmetic either. 
+    So our goal is to find another way that is both more computationally efficient than FD and complex-step, and a more accurate than FD. 
+
+    %Derive the direct method 
+    % Now we have something that is at least more accurate, if not more efficient
+
+    % With a few manipulations of the equations, we create an alternate form that offers better computatonal performance
+    %Derive the adjoint method
+
+
 \end{document}
