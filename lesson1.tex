@@ -210,7 +210,7 @@
     Since this system of equations is nonlinear, we can no longer represent it in a simple matrix form and solve it with a simple matrix inverse. 
     This had two important consequences. 
     First, since this system of equations is now second order we know that there will be two roots which means there are two minimum values. 
-    Also, and perhaps more importantly, we now need to employ a a nonlinear solution technique to find those roots. 
+    Also, and perhaps more importantly, we now need to employ a nonlinear solution technique to find those roots. 
     For a simple problem like this, perhaps you can find the roots by hand using substitution. 
 
     What if your objective is a cubic function 1000 variables? 
@@ -243,7 +243,7 @@
 
     Obviously, deriving one million equations isn't feasible. 
     For smaller problems, you could maybe compute the Hessian by hand --- in fact, this is what J.W. Gibbs did to solve for chemical equilibrium in 1857.
-    However, for general problems, there is a suite of non-linear optimization methods (e.g. sequential quadratic programming and interior point methods) have been developed so that we either don't need the Hessian at all or don't have to explicitly compute it. 
+    However, for general problems, there is a suite of non-linear optimization methods (e.g. sequential quadratic programming and interior point methods) that have been developed so that we either don't need the Hessian at all or don't have to explicitly compute it. 
     Some optimization algorithms, called quasi-Newton methods, approximate the Hessian using only first derivative information.
 
     So, while you most likely do not need to explicitly compute the Hessian, you still need to compute the first-derivatives of the objective function with respect to the design variables. 
@@ -296,7 +296,7 @@
             \frac{d\mathcal{L}}{d\lambda} &= H(x) &&= 0 \label{eq:dLdlambda} \\
             \frac{d\mathcal{L}}{dx} &= \frac{dF}{dx} - \lambda \frac{dH}{dx} &&= 0 \label{eq:dLdx}
         \end{alignat}
-        Because of Equation~\eqref{eq:dLdlambda}, solutions to this system of equations with clearly have to satisfy the equality constraints. 
+        Because of Equation~\eqref{eq:dLdlambda}, solutions to this system of equations which clearly have to satisfy the equality constraints. 
         Equation~\eqref{eq:dLdx} is what actually minimizes the Lagrangian.
         If we have $N_h$ constraints, then  Equation~\eqref{eq:dLdlambda} is actually a set of $N_h$ equations. 
         If we have $N_x$ design variables, then Equation~\eqref{eq:dLdx} is a set of $N_x$ equations. 
@@ -394,7 +394,7 @@
     Inherent in that description of the function is the idea that there is an exact, analytic solution for $F$ given any value of $x$. 
     While this situation is certainly true for simple polynomial expressions, and also for some kinds of more complex engineering analyses, 
     the reality is that the vast majority of modern engineering computations include implicit calculations. 
-    For example CFD and FEA analyses are implicit and turbine engine cycle analysis is highly implicit. 
+    For example CFD and FEA are implicit and turbine engine cycle analysis is highly implicit. 
     Tools such as COMSOL, a popular multiphysics solver, is also implicit in nature. 
 
     A general implicit function can be represented as 
@@ -417,7 +417,7 @@
         \end{tabular}
     \end{table}
     The mass of the beam $m$ can be directly computed as a function of the thickness design variables. 
-    But the displacement of the beam ($u$), which will be used as a constraint, is the implicit output of a FEA analysis. 
+    But the displacement of the beam ($u$), which will be used as a constraint, is the implicit output of a FEA. 
     So we have no explicit form for out constraint value, but we still need to compute derivatives of it with respect the design variables. 
     In other words, we need to compute $\frac{du}{dt}$, when the only definition we have for $u$ is $R(t,u)=0$.
 
@@ -433,7 +433,7 @@
                         \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}} \ ,
                         \label{eq:mach_area}
     \end{equation}
-    where N$A$ is the flow area, $A^*$ critical flow area at Mach=1, $MN$ is the Mach number of the flow, and $\gamma$ is the ratio of specific heats that we'll assume to be a constant ($\gamma=1.4$ is a very good assumption except at really high temperatures).
+    where $A$ is the flow area, $A^*$ critical flow area at Mach=1, $MN$ is the Mach number of the flow, and $\gamma$ is the ratio of specific heats that we'll assume to be a constant ($\gamma=1.4$ is a very good assumption except at really high temperatures).
 
     Equation~\eqref{eq:mach_area} is an explicit function that computes the area ratio $A/A^*$ directly, given any value for $MN$. 
     You can easily plot the relationship between the two --- check out the example code given in Figure~\ref{fig:mach-area}. 
@@ -479,7 +479,7 @@
     The word ``disguise'' is used very intentionally here. What you can do is put a black-box wrapper around an implicit function to make it look like an explicit one, even though the internal calculation is still being performed in an implicit way. 
 
     Lets go back to our example to see this in action, solving for Mach number when given an area ratio. 
-    The implicit form is given in by Equation~\ref{eq:implicit_mach_area}. 
+    The implicit form is given in Equation~\ref{eq:implicit_mach_area}. 
     We're \textbf{not} going to change that at all. 
     However, if look at the code in Figure~\ref{eq:implicit_mach_area} you see that we can get solutions with a single call to the `newton' method. 
     Now, with a few more lines of code, we can wrap that whole process up into something that looks like a regular explicit function, as shown in Figure~\ref{fig:mach-area-fake-explicit}. 
@@ -587,23 +587,23 @@
 
     Lets look at a Taylor expansion for $F(x+\epsilon i)$ --- so we're looking at complex arithmetic now. 
     \begin{align}
-        F(x+\epsilon) &= F(x) + \frac{dF}{dx}\epsilon i + \frac{1}{2}\frac{d^2F}{dx^2} (\epsilon i)^2 +  \frac{1}{6}\frac{d^3F}{dx^3} (\epsilon i)^3 + ... \\
-        F(x+\epsilon) &= F(x) + \frac{dF}{dx}\epsilon i - \frac{1}{2}\frac{d^2F}{dx^2} \epsilon^2 +  \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 i + ... \label{eq:complex_taylor}
+        F(x+\epsilon i) &= F(x) + \frac{dF}{dx}\epsilon i + \frac{1}{2}\frac{d^2F}{dx^2} (\epsilon i)^2 +  \frac{1}{6}\frac{d^3F}{dx^3} (\epsilon i)^3 + ... \\
+        F(x+\epsilon i) &= F(x) + \frac{dF}{dx}\epsilon i - \frac{1}{2}\frac{d^2F}{dx^2} \epsilon^2 +  \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 i + ... \label{eq:complex_taylor}
     \end{align}
     Notice that in the right hand side of Equation~\eqref{eq:complex_taylor} some of the terms are real and some of the terms are complex. 
     In particular, the second order term that includes $d^2F/dx^2$ is real and negative because $i^2=-1$.  
     Similarly, the third order term is negative because $i^3=-i$.
     We can split Equation~\eqref{eq:complex_taylor} into its real and imaginary parts: 
     \begin{align}
-        Re[F(x+\epsilon)] &= F(x) - \frac{1}{2}\frac{d^2F}{dx^2} (\epsilon i)^2 + ... \\
-        Im[F(x+\epsilon)] &= \frac{dF}{dx}\epsilon -  \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 + ... \label{eq:im_complex_taylor}
+        Re[F(x+\epsilon i)] &= F(x) - \frac{1}{2}\frac{d^2F}{dx^2} (\epsilon i)^2 + ... \\
+        Im[F(x+\epsilon i)] &= \frac{dF}{dx}\epsilon -  \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 + ... \label{eq:im_complex_taylor}
     \end{align}
     Equation~\eqref{eq:im_complex_taylor} has the terms we need now. 
     We just need to re-arrange them to solve for $\frac{dF}{dx}$ and discard any higher order terms: 
     \begin{align}
-        \frac{dF}{dx}\epsilon  &= Im[F(x+\epsilon)] + \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 + ... \\
-        \frac{dF}{dx}  &= \frac{1}{\epsilon}Im[F(x+\epsilon)] + \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^2 + ... \\
-        \frac{dF}{dx}  &\approx \frac{1}{\epsilon}Im[F(x+\epsilon)] \label{eq:complex_step}
+        \frac{dF}{dx}\epsilon  &= Im[F(x+\epsilon i)] + \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^3 + ... \\
+        \frac{dF}{dx}  &= \frac{1}{\epsilon}Im[F(x+\epsilon i)] + \frac{1}{6}\frac{d^3F}{dx^3} \epsilon^2 + ... \\
+        \frac{dF}{dx}  &\approx \frac{1}{\epsilon}Im[F(x+\epsilon i)] \label{eq:complex_step}
     \end{align}
     Equation~\eqref{eq:complex_step} is called the complex-step method. 
     Notice that there is no subtraction at all here, so this method does not suffer from subtractive cancellation. 
@@ -674,7 +674,7 @@
     If you can compute an explicit inverse of $\partial R/\partial y$, as shown in Equation~\eqref{eq:direct_deriv_solve},
     Then each of these linear solves is little more than a simple matrix-vector product, which is very cheap. 
     
-    However, for complex implicit functions like CFD or FEA analyses you might not be able (or at least might not want to) actually compute the inverse for $\partial R/\partial y$. 
+    However, for complex implicit functions like CFD or FEA you might not be able (or at least might not want to) actually compute the inverse for $\partial R/\partial y$. 
     In these cases, there are iterative linear solvers (e.g. Krylov methods) which can solve the linear system for you. 
     These methods scale to the larger problems that a CFD solver poses, but they are also more expensive. 
     In these cases, you can roughly approximate the cost of a linear solve to be the same as that of the non-linear solve. 
@@ -696,7 +696,7 @@
 
     So we want to minimize some objective function, $F(x,y)$, with respect to $x$ where $R(x,y)=0$. 
     The objective function itself is a simple explicit function of $x,y$. 
-    But one of inputs to that function is the output of an implicit function, $y$. 
+    But one of the inputs to that function is the output of an implicit function, $y$. 
     The optimizer is going to need $df/dx$. 
     How do we compute that? 
 
@@ -713,21 +713,21 @@
     This is what you get by default when you just provide the objective function to matlab's \textit{fmincon} or scipy's \textit{minimize}.
 
     While it is easy to implement, the approach has some important downsides. 
-    Just as we discussed before, the computational cost for this approach scales linearly if $x$. 
+    Just as we discussed before, the computational cost for this approach scales linearly withif $x$. 
     So if $x$ is large (i.e. you have a lot of design variables), then this will be very expensive. 
     
     Perhaps we're willing to pay the computational cost, because we can use some parallel computing resources to keep the wall time down. 
     Even then, we will still potentially run into another challenge. 
     Realizing that this monolithic function is actually an example of an implicit function disguised as an explicit one, 
-    we know that approximating derivatives if it with FD will be noisy at best and horribly wrong at worst. 
+    we know that approximating derivatives of it with FD will be noisy at best and horribly wrong at worst. 
     We could use complex-step, assuming that  $\hat{F}(x)$ was complex-safe but that would mean that even the non-linear solver itself would need to be complex-safe. 
     This is doable but somewhat non-trivial in practice. 
     
-    So our goal is to find another way that is both more computationally efficient and more accurate the the monolithic numerical approximations. 
+    So our goal is to find another way that is both more computationally efficient and more accurate the monolithic numerical approximations. 
 
     \subsection{The direct analytic derivative method}
 
-    We're going to derive the direct analytic derivative method, using an approach very similar to what was used in Section~\ref{sec:taking_derivs_of_implicit_functions}.\ref{subsec:analytic_deriv_implicit_function}. 
+    We're going to derive the direct analytic derivative method, using an approach very similar to what was used in Section~\ref{subsec:analytic_deriv_implicit_function}. 
     This method will give us better accuracy than the monolithic numerical approximation, with moderately lower computational cost. 
 
     Again, we have arbitrary function $F(x,y)$, where $x$ is a vector of design variables and $y$ is a vector of implicit output variables that also depend on $x$. 
@@ -787,7 +787,7 @@
     \underbrace{ \left( \overbrace{\frac{\partial F}{\partial y}}^{1 \times m} 
     \overbrace{\left[\frac{\partial R}{\partial y}\right]^{-1}}^{m \times m} \right)}_{\psi^T}
     \underbrace{\frac{\partial R}{\partial x}}_{m \times n} \\
-    \frac{d F}{d x} &= \frac{\partial F}{\partial x} - \psi^T\frac{\partial R}{\partial x} \\
+    \frac{d F}{d x} &= \frac{\partial F}{\partial x} - \psi^T\frac{\partial R}{\partial x}
     \end{align}
     We just combined $\partial F/\partial y$ and $\partial R/ \partial y$ into a single $1 \times m$ vector, which we've labeled $\psi^T$. 
     Now, if we can find a way to compute $\psi$, then we can solve for the total derivative we need. 
