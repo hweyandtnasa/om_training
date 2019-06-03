@@ -293,7 +293,7 @@
 
         Lets differentiate the Lagrangian with respect to all the unknown variables ($\lambda$ and $x$) and set the equations equal to 0: 
         \begin{alignat}{3}
-            \frac{d\mathcal{L}}{d\lambda} &= \frac{dH}{dx} &&= 0 \label{eq:dLdlambda} \\
+            \frac{d\mathcal{L}}{d\lambda} &= H(x) &&= 0 \label{eq:dLdlambda} \\
             \frac{d\mathcal{L}}{dx} &= \frac{dF}{dx} - \lambda \frac{dH}{dx} &&= 0 \label{eq:dLdx}
         \end{alignat}
         Because of Equation~\eqref{eq:dLdlambda}, solutions to this system of equations with clearly have to satisfy the equality constraints. 
@@ -368,7 +368,7 @@
         that ensures that one or the other of the two variables must be 0. 
         The complimentary slackness condition gives us an additional $N_g$ equations, which means we now have a well-defined problem formulation that can be solved to find minima: 
         \begin{align}
-            \frac{dG}{dx} &= 0 \\
+            G(x) &= 0 \\
             \frac{dF}{dx} - \lambda \frac{dG}{dx} &= 0 \\
             \lambda \xi &= 0
         \end{align}
@@ -792,16 +792,16 @@
     We just combined $\partial F/\partial y$ and $\partial R/ \partial y$ into a single $1 \times m$ vector, which we've labeled $\psi^T$. 
     Now, if we can find a way to compute $\psi$, then we can solve for the total derivative we need. 
     \begin{align}
-    \psi^T &= - \frac{\partial F}{\partial y} \left[\frac{\partial R}{\partial y}\right]^{-1}\notag\\
-    \psi &= - \left[\frac{\partial F}{\partial y} \left[\frac{\partial R}{\partial y}\right]^{-1}\right]^T \notag\\
-    \psi &= - \left[\frac{\partial R}{\partial y}^T\right]^{-1} \frac{\partial F}{\partial y}^T \notag\\
-    \left[\frac{\partial R}{\partial y}^T\right]\psi &= -\frac{\partial R}{\partial y}^T \left[\frac{\partial R}{\partial y}^T\right]^{-1} \frac{\partial F}{\partial y}^T \notag\\
-    \underbrace{\left[\frac{\partial R}{\partial y}\right]^{T}}_{m \times m} \underbrace{\psi}_{m \times 1} &=  -\underbrace{\left[\frac{\partial F}{\partial y}\right]^{T}}_{m \times 1}. \label{eq:linear_adjoint}
+    \psi^T &=  \frac{\partial F}{\partial y} \left[\frac{\partial R}{\partial y}\right]^{-1}\notag\\
+    \psi &=  \left[\frac{\partial F}{\partial y} \left[\frac{\partial R}{\partial y}\right]^{-1}\right]^T \notag\\
+    \psi &=  \left[\frac{\partial R}{\partial y}^T\right]^{-1} \frac{\partial F}{\partial y}^T \notag\\
+    \left[\frac{\partial R}{\partial y}^T\right]\psi &= \frac{\partial R}{\partial y}^T \left[\frac{\partial R}{\partial y}^T\right]^{-1} \frac{\partial F}{\partial y}^T \notag\\
+    \underbrace{\left[\frac{\partial R}{\partial y}\right]^{T}}_{m \times m} \underbrace{\psi}_{m \times 1} &=  \underbrace{\left[\frac{\partial F}{\partial y}\right]^{T}}_{m \times 1}. \label{eq:linear_adjoint}
     \end{align}
     Equation~\eqref{eq:linear_adjoint} gives us a way to solve for $\psi$ using only partial derivative terms that we already know, but more importantly it only requires one linear solve! 
     This is called the ``adjoint analytic method'', and it allows us to compute the total derivative we need with only a single linear solve with the following two equations:
     \begin{align}
-        \left[{\frac{\partial F}{\partial y}} \right]^T \psi &= - \frac{\partial F}{\partial y}^{T} \notag \\
+        \left[{\frac{\partial F}{\partial y}} \right]^T \psi &=  \frac{\partial F}{\partial y}^{T} \notag \\
         \frac{d F}{d x} &= \frac{\partial F}{\partial x} - \psi^T\frac{\partial R}{\partial x} \ .
     \end{align}
 
