@@ -383,6 +383,7 @@
     Hence, we have gone over this material so that you can understand how an optimizer sees the problem you are posing to it. 
 
     \section{Taking Derivatives of Outputs of Implicit Functions}
+    \label{sec:taking_derivs_of_implicit_functions}
 
     We have seen how gradient-based optimization can create a system of implicit equations by taking derivatives of the objective function and constraints and we've also discussed briefly how Newton's method could be used to solve that system of equations, if you were willing to compute the actual Hessian matrix.
     If you do not wish to form the exact Hessian, then many gradient based optimization algorithms exist that don't require it, 
@@ -627,6 +628,7 @@
 
 
     \subsection{Computing analytic derivatives of outputs of implicit functions}
+    \label{subsec:analytic_deriv_implicit_function}
 
     If you don't want to use FD or complex-step methods, then your other option is analytic differentiation. 
     For explicit functions, you know how to do this.
@@ -681,40 +683,128 @@
 
 
 
-    \section{Taking derivative of outputs of mixed implicit/explicit functions}
+    \section{Taking derivatives of outputs of mixed implicit/explicit functions}
 
     In real applications, your model is likely to be built from a mixture of implicit and explicit functions that are chained together.
     A really simple example of this would be if you wanted to optimize the thickness distribution of a beam subject to an end load to minimize the average deflection of the beam as predicted by an FEA model. 
+    
     Admittedly, this is a silly optimization problem formulation. 
     We know the answer here will simply be to pick the thickest structure allowed everywhere. 
     But the purpose of the example is not to come up with a good optimization, but rather a simple mixed explicit/implicit function. 
+    
     Another example would be to minimize the thrust specific fuel consumption (TSFC) for a jet engine with respect to the design parameters of that engine cycle --- engine cycle analysis requires the solution to an implicit nonlinear system of equations to compute implicit outputs which are then fed into the TSFC calculation). 
 
     So we want to minimize some objective function, $F(x,y)$, with respect to $x$ where $R(x,y)=0$. 
     The objective function itself is a simple explicit function of $x,y$. 
     But one of inputs to that function is the output of an implicit function, $y$. 
-    The optimizer is going to need $df/dx$, but how do we compute that? 
+    The optimizer is going to need $df/dx$. 
+    How do we compute that? 
 
+
+    \subsection{Monolithic FD or Complex-step}
     One option would be to use FD across the whole model. 
     Lets call that the ``monolithic numerical approach'', because you are treating the entire model as a single monolithic function. 
     In other words, you would be numerically computing derivatives of 
     \begin{equation}
-        f= \hat{F}(x) \ .
+        f= \hat{F}(x) \ , 
     \end{equation}
+    where $\hat{F}(x)$ is the overall function that looks explicit, but really is an implicit function in disguise. 
     This is the approach that is most commonly taken by users of gradient based optimization. 
+    This is what you get by default when you just provide the objective function to matlab's \textit{fmincon} or scipy's \textit{minimize}.
+
     While it is easy to implement, the approach has some important downsides. 
-    Just as we discussed before, the computational scaling for this approach is bad if $x$ grows to be a large vector (if you have a fine mesh for your FEA for example). 
-    Lets assume we're willing to pay the computational cost though. 
+    Just as we discussed before, the computational cost for this approach scales linearly if $x$. 
+    So if $x$ is large (i.e. you have a lot of design variables), then this will be very expensive. 
+    
+    Perhaps we're willing to pay the computational cost, because we can use some parallel computing resources to keep the wall time down. 
+    Even then, we will still potentially run into another challenge. 
     Realizing that this monolithic function is actually an example of an implicit function disguised as an explicit one, 
     we know that approximating derivatives if it with FD will be noisy at best and horribly wrong at worst. 
+    We could use complex-step, assuming that  $\hat{F}(x)$ was complex-safe but that would mean that even the non-linear solver itself would need to be complex-safe. 
+    This is doable but somewhat non-trivial in practice. 
     
-    So we need a better way. 
-    We could use complex-step to get better accuracy, if the code can handle complex arithmetic. 
-    That would be even more expensive than first order FD though, and not all engineering codes can handle complex arithmetic either. 
-    So our goal is to find another way that is both more computationally efficient than FD and complex-step, and a more accurate than FD. 
+    So our goal is to find another way that is both more computationally efficient and more accurate the the monolithic numerical approximations. 
 
-    %Derive the direct method 
-    % Now we have something that is at least more accurate, if not more efficient
+    \subsection{The direct analytic derivative method}
+
+    We're going to derive the direct analytic derivative method, using an approach very similar to what was used in Section~\ref{sec:taking_derivs_of_implicit_functions}.\ref{subsec:analytic_deriv_implicit_function}. 
+    This method will give us better accuracy than the monolithic numerical approximation, with moderately lower computational cost. 
+
+    Again, we have arbitrary function $F(x,y)$, where $x$ is a vector of design variables and $y$ is a vector of implicit output variables that also depend on $x$. 
+    From the chain rule, we know that
+    \begin{equation}
+      \frac{d F}{d x} = \frac{\partial F}{\partial x} + \frac{\partial F}{\partial y}\frac{d y}{d x} .
+      \label{eq:direct_chain_rule}
+    \end{equation} 
+    If we use Equation~\eqref{eq:direct_deriv_solve}, we can directly solve for the $dy/dx$ term and substitute it in: 
+    \begin{equation}
+      \frac{d F}{d x} = \frac{\partial F}{\partial x} - \frac{\partial F}{\partial y} \left( \left[\frac{\partial R}{\partial y}\right]^{-1} \frac{\partial R}{\partial x} \right).
+      \label{eq:direct_method}
+    \end{equation}
+    Equation~\ref{eq:direct_method} is called the ``direct analytic method''. 
+    Notice that the right hand side of Equation~\ref{eq:direct_method} is composed only of partial derivatives. 
+    Partial derivatives are relatively easy and inexpensive to compute them. 
+    If we derived all the partial derivative terms by hand, then we would have a pure analytic method. 
+    We could also approximate them numerically using FD or complex-step, which would give us a semi-analytic method. 
+
+    The semi-analytic method will be less accurate than the pure analytic method, but will still be far cheaper and more accurate than the monolithic numerical approximation approaches. 
+
+    In Equation~\ref{eq:direct_method}, we've used an explicit inverse of $\partial R/\partial y$. 
+    In some cases, that inverse is not feasible to compute. In that case the direct method is solved in two steps: 
+    First you would solve for the columns of $dy/dx$ one at a time, using an iterative linear solver to find solutions to
+    \begin{equation}
+    \left[\frac{\partial R}{\partial y}\right] \frac{dy}{dx} = - \frac{\partial R}{\partial x} \ . 
+    \end{equation}
+    Then once you have assembled $dy/dx$, you can plug that matrix directly into Equation~\eqref{eq:direct_chain_rule} to compute $dF/dx$. 
+    So the compute cost of the direct analytic method scales with  the size of $x$, because that governs how many linear solves are needed to assembled $dy/dx$. 
+
+
+    
+    \subsection{The adjoint analytic derivative method}
+
+    While the direct analytic derivative method does out perform monolithic numerical differentiation, its computational cost still scales with the number of design variables. 
+    So if we formulate design problems with 1000 or 1,000,000 design variables then the direct method is still going to be very expensive. 
+
+    With some manipulation of the direct method equations, we can reformulate things to give us the same accuracy but with much better computational scaling. 
+    As we'll see, the computational cost of the adjoint method scales with the number of outputs that we want to take derivatives of, and is independent of the number of design variables. 
+
+    Let's re-examine Equation~\eqref{eq:direct_method}, but this time paying attention to the sizes of all the matrices involved. 
+    We have a design variable vector, $x$, that is length $n$. 
+    We have a implicit variable vector, $y$, that is length $m$. 
+    We'll assume that both $n$ and $m$ are very large. 
+    $F(x,y)$ is a scalar function, so it has a size of 1. 
+    \begin{equation}
+    \underbrace{\frac{d F}{d x}}_{1 \times n} = 
+    \underbrace{\frac{\partial F}{\partial x}}_{1 \times n} - 
+    \overbrace{\frac{\partial F}{\partial y}}^{1 \times m} 
+    \left( \overbrace{\left[\frac{\partial R}{\partial y}\right]^{-1}}^{m \times m} 
+    \underbrace{\frac{\partial R}{\partial x}}_{m \times n} \right).
+    \end{equation}
+    Lets rearrange the parenthesis on the right most term: 
+    \begin{align}
+    \underbrace{\frac{d F}{d x}}_{1 \times n} &= 
+    \underbrace{\frac{\partial F}{\partial x}}_{1 \times n} - 
+    \underbrace{ \left( \overbrace{\frac{\partial F}{\partial y}}^{1 \times m} 
+    \overbrace{\left[\frac{\partial R}{\partial y}\right]^{-1}}^{m \times m} \right)}_{\psi^T}
+    \underbrace{\frac{\partial R}{\partial x}}_{m \times n} \\
+    \frac{d F}{d x} &= \frac{\partial F}{\partial x} - \psi^T\frac{\partial R}{\partial x} \\
+    \end{align}
+    We just combined $\partial F/\partial y$ and $\partial R/ \partial y$ into a single $1 \times m$ vector, which we've labeled $\psi^T$. 
+    Now, if we can find a way to compute $\psi$, then we can solve for the total derivative we need. 
+    \begin{align}
+    \psi^T &= - \frac{\partial F}{\partial y} \left[\frac{\partial R}{\partial y}\right]^{-1}\notag\\
+    \psi &= - \left[\frac{\partial F}{\partial y} \left[\frac{\partial R}{\partial y}\right]^{-1}\right]^T \notag\\
+    \psi &= - \left[\frac{\partial R}{\partial y}^T\right]^{-1} \frac{\partial F}{\partial y}^T \notag\\
+    \left[\frac{\partial R}{\partial y}^T\right]\psi &= -\frac{\partial R}{\partial y}^T \left[\frac{\partial R}{\partial y}^T\right]^{-1} \frac{\partial F}{\partial y}^T \notag\\
+    \underbrace{\left[\frac{\partial R}{\partial y}\right]^{T}}_{m \times m} \underbrace{\psi}_{m \times 1} &=  -\underbrace{\left[\frac{\partial F}{\partial y}\right]^{T}}_{m \times 1}. \label{eq:linear_adjoint}
+    \end{align}
+    Equation~\eqref{eq:linear_adjoint} gives us a way to solve for $\psi$ using only partial derivative terms that we already know, but more importantly it only requires one linear solve! 
+    This is called the ``adjoint analytic method'', and it allows us to compute the total derivative we need with only a single linear solve with the following two equations:
+    \begin{align}
+        \left[{\frac{\partial F}{\partial y}} \right]^T \psi &= - \frac{\partial F}{\partial y}^{T} \notag \\
+        \frac{d F}{d x} &= \frac{\partial F}{\partial x} - \psi^T\frac{\partial R}{\partial x} \ .
+    \end{align}
+
 
     % With a few manipulations of the equations, we create an alternate form that offers better computatonal performance
     %Derive the adjoint method
