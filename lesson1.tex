@@ -50,12 +50,12 @@
     \subsection*{Why do we need optimization and what does ``gradient based'' mean?}
         
         Optimization is a technique for finding solutions --- the design variables --- that maximize or minimize some quantity of interest  --- the objective function. 
-        Fundamentally, the need for optimization arises when you are dealing with under-defined problems; when you have more degrees of freedom than equations to constrain them with. 
+        Fundamentally, the need for optimization arises when you are dealing with under-defined problems; you have more degrees of freedom than equations to constrain them with. 
 
         Examples: 
         \begin{itemize}
             \item Find the minimum value of a parabola
-            \item What are the angle of attack and chord length needed to get a 5 Newtons of lift for a NACA 0012 airfoil
+            \item Find the angle of attack and chord length needed to get a 5 Newtons of lift for a NACA 0012 airfoil
         \end{itemize}
 
         The objective function provides a means of distinguishing one solution from another, 
@@ -72,12 +72,12 @@
             For another, this approach is dead simple and highly parallel. 
             Perhaps most importantly, within your defined design space, this is the only method that can gurantee that you will find the overall best answer, or the global optimum. 
 
-            If you can afford to use a brute-force technique, you should! As a rule of thumb, if you have 3 or less variables and a function that runs in under 0.01 seconds, then consider this approach. 
+            If you can afford to use a brute-force technique, you should! As a rule of thumb, if you have 3 or fewer variables and a function that runs in under 0.01 seconds, then consider this approach. 
 
         \subsubsection{Gradient-free}
             As the name suggests, these methods do not require any gradient information to perform optimization.
             Some methods, such as the simplex algorithm and the Constrained Optimization by Linear Approximation (COBYLA), are mathematically rigorous approaches to solving optimization problems. 
-            Other methods, such as the massive set of evolutionary algorithms (e.g. genetic algorithms and partical swarm algorithms), are heuristic in nature and do not necessarily rest on a rigorous mathematical footing. 
+            Other methods, such as the massive set of evolutionary algorithms (e.g. genetic algorithms and particle swarm algorithms), are heuristic in nature and do not necessarily rest on a rigorous mathematical footing. 
 
             Regardless of the mathematical underpinnings of these methods, they can be quite useful. 
             Like the brute force method they are typically very easy to implement and very highly parallel, but they can typically work on problems with as many as 10-20 design variables even if the cost of that computing the objective function is much higher. 
