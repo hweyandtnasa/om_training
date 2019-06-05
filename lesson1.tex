@@ -66,7 +66,7 @@
         
         \subsubsection{Brute Force}
             If your objective function is cheap enough and the number of design variables is small enough, then you can simply enumerate the entire design space and pick the best design out of the set of solutions you found. 
-            If your design variable are continuous, you can just pick a very fine discretization to sample with. 
+            If your design variables are continuous, you can just pick a very fine discretization to sample with. 
 
             There are some very nice aspects of this approach. For one thing, you get a whole lot more information than just what the best design is, since you know the answer for all the designs. 
             For another, this approach is dead simple and highly parallel. 
@@ -81,12 +81,12 @@
 
             Regardless of the mathematical underpinnings of these methods, they can be quite useful. 
             Like the brute force method they are typically very easy to implement and very highly parallel, but they can typically work on problems with as many as 10-20 design variables even if the cost of that computing the objective function is much higher. 
-            There are some advanced gradient-free methods that can even scaled up to 100 variables with reasonable performance. 
+            There are some advanced gradient-free methods that can even be scaled up to 100 variables with reasonable performance. 
             Another important characteristic of gradient-free methods is that they are suitable for use even when some design variables are discrete. 
 
             Despite the many good qualities of gradient-free methods, they tend to require a large number of function evaluations to get a reasonable answer. 
             They also commonly include some stochastic qualities that make it so you will get a different answer each time you run them. 
-            This is why you will often see results from gradient free methods presented as an average (or some other statistical quantity) taken over multiple runs. 
+            This is why you will often see results from gradient-free methods presented as an average (or some other statistical quantity) taken over multiple runs. 
 
             Here are some good gradient-free methods that you can look into: 
             \begin{itemize}
@@ -94,7 +94,7 @@
                 \item EGO: Efficient Global Optimization 
                 \item NSGA-II: Non-dominated Sorting Genetic Algorithm II
                 \item ALPSO: Augmented Lagrangian Particle Swarm Optimization
-            \end{itemize}Improvement of efficient global optimization with application to aircraft wing design
+            \end{itemize}%Improvement of efficient global optimization with application to aircraft wing design
 
         \subsubsection{Gradient-based}
 
@@ -107,7 +107,7 @@
             It is also important to note that, since the definition of a derivative fundamentally assumes a continuous function and a continuous design space, these methods can only work on continuous problems. 
 
             Another potential limitation of gradient-based methods is that they can only find ``local optima'', and hence are less effective at searching bumpy design spaces. 
-            In other words, gradient-based methods are very efficient at climbing whatever hill the initial guess has started them on but they will not search any other hills even if they might have taller peaks. 
+            In other words, gradient-based methods are very efficient at climbing whatever hill the initial guess has started them on, but they will not search any other hills even if they might have taller peaks. 
 
             Despite the challenges associated with computing derivatives, the limitation to continuous design spaces, and the local nature of the algorithms, when properly implemented the performance of gradient-based methods is so great that it justifies their use even for relatively small optimization problems. 
             Gradient-based methods are the only class of optimization algorithms that can handle 1000's, 10,000's, or even 1,000,000's of design variables. 
@@ -134,7 +134,7 @@
 \section{Introduction to the Theory Behind Gradient-Based Optimization}
 
     \subsection{Unconstrained Optimization}
-    Consider a simple parabolic function of one variable: 
+    Consider a simple parabolic function of one variable: less
     \begin{equation}
         f = F(x_1) = (x_1 - 3)^2 + x_1 - 3 \ . 
     \end{equation}
@@ -167,7 +167,7 @@
     Since it is still parabolic we know that there is still only one minimum. 
     $f$ is still a scalar, but now the input is 2 scalars: $x_1$ and $x_2$
     To find the minimum, we take the derivative of $f$ with respect to the two $x$ variables and set the result equal to 0. 
-    Because there are two inputs, instead of a single equation we get a system of two equations. 
+    Because there are two inputs, we get a system of two equations instead of a single equation. 
     \begin{align}
         \frac{\partial f}{\partial x_1} &= 2(x_1 - 3) + x_2 = 0 \notag \\
         \frac{\partial f}{\partial x_2} &= x_1 + 2(x_2 + 4.0) = 0 \label{eq:linear_deriv}
@@ -196,13 +196,13 @@
         \end{bmatrix} \ .
     \end{equation}
     We can now solve this linear system by inverting the matrix on the left hand side, to find the values of $x_1$ and $x_2$ that will minimize the original paraboloid objective function.
-    So for this specific case, with a parabolic objective function, it turns out the there is also an explicit form for the nonlinear system of equations needed to find the minimum. 
+    For this specific case, with a parabolic objective function, it turns out the there is also an explicit form for the nonlinear system of equations needed to find the minimum. %confused about this
 
     What if the objective function is cubic though? 
     \begin{equation}
         f = F(x_1,x_2) = (x_1 - 3)^2 + x_1^2 x_2 + (x_2 + 4.0)^2 - 3 \ . 
     \end{equation}
-    We made it cubic my modifying the cross term ($x_1^2 x_2$), and so now the system of equations to find the minimum will be: 
+    We made it cubic by modifying the cross term ($x_1^2 x_2$), and so now the system of equations to find the minimum will be: 
     \begin{align}
         \frac{\partial f}{\partial x_1} &= 2(x_1 - 3) + 2 x_1 x_2 = 0 \notag \\
         \frac{\partial f}{\partial x_2} &= x_1^2 + 2(x_2 + 4.0) = 0 \ .
@@ -213,7 +213,7 @@
     Also, and perhaps more importantly, we now need to employ a nonlinear solution technique to find those roots. 
     For a simple problem like this, perhaps you can find the roots by hand using substitution. 
 
-    What if your objective is a cubic function 1000 variables? 
+    What if your objective is a cubic function of 1000 variables? 
     \begin{equation}
         f = F(x_1,x_2, ..., x_{1000}) = F(\bar{x}) \ . 
     \end{equation}
@@ -221,7 +221,7 @@
     \begin{equation} 
     r = \mathcal{R}(x_1, x_2, ...,  x_{1000}) =  \mathcal{R}(\bar{x}) = \frac{\partial f}{\partial \bar{x}} =  0 \ . 
     \end{equation}
-    This is far to large to solve by hand, but the implicit form of the equations can be solved using a numerical technique such as Newton's method. 
+    This is far too large to solve by hand, but the implicit form of the equations can be solved using a numerical technique such as Newton's method. 
     Newton's method is composed of the iterative solution to the following equation: 
     \begin{equation}
          \Delta \bar{x} = - \left[\frac{\partial \mathcal{R}}{\partial \bar{x}} \right]^{-1} \bar{r} \ , 
@@ -229,14 +229,14 @@
     where $\left[\frac{\partial \mathcal{R}}{\partial x} \right]$ is a matrix of partial derivatives computed about some $\bar{x}^*$, $\left[\Delta x\right]$, $\bar{r}$ is the vector residual values computed at $\bar{x}^*$, and $\Delta \bar{x}$ is the update that should be applied to $\bar{x}^*$ for the next iteration. 
 
     Note that we now need $\frac{\partial \mathcal{R}}{\partial \bar{x}}$, but $\mathcal{R}$ was itself defined as a partial derivative of $f$ with respect to $\bar{x}$. 
-    So now that means that we now need second-derivatives with respect to $f$: 
+    So that means that we now need second-derivatives with respect to $f$: 
     \begin{equation}
          \left[\frac{\partial \mathcal{R}}{\partial \bar{x}} \right] =  \left[\frac{\partial^2 f}{\partial \bar{x}^2} \right] \ . 
     \end{equation}
     $\frac{\partial^2 f}{\partial \bar{x}^2}$ is called the Hessian matrix of $f$.
     This is how, for an unconstrained optimization, we can create a well-defined problem (same number of unknowns as equations to constrain them) by taking derivatives of the objective function with respect to the design variables. 
 
-    If the system of equations we get by taking those derivatives is nonlinear, then we need to Newton's method to iteratively solve for roots that will minimize the objective.  
+    If the system of equations we get by taking those derivatives is nonlinear, then we need to use Newton's method to iteratively solve for roots that will minimize the objective.  
     If $\bar{x}$ is a length 1000 vector, The Hessian of $f$ will be $1000 \times 1000$, 
     so there are one million terms in the Hessian. 
     We would need to derive a formula for each of those terms in order to implement Newton's method and solve the optimization problem. 
@@ -247,7 +247,7 @@
     Some optimization algorithms, called quasi-Newton methods, approximate the Hessian using only first derivative information.
 
     So, while you most likely do not need to explicitly compute the Hessian, you still need to compute the first-derivatives of the objective function with respect to the design variables. 
-    So for 1000 variable unconstrained optimization we would still need to derive 1000 formulas. 
+    So for 1000 variable unconstrained optimization, we would still need to derive 1000 formulas. 
     This is certainly much more achievable, but clearly still a lot of work. 
 
     \subsection{Constrained Optimizations}
@@ -255,7 +255,7 @@
     Practically speaking, optimization problems are very rarely unconstrained. 
     Usually, you want to maximize or minimize an objective function, subject to some set of constraints. 
     While an unconstrained optimization problem is under-defined (more unknowns than equations to define them), 
-    a constrained optimization problem can actually be under-defined, well-defined, or even over-defined (less variables than equations to define them). 
+    a constrained optimization problem can actually be under-defined, well-defined, or even over-defined (fewer variables than equations to define them). 
     It all depends on how many constraints you have in your problem, compared to how many design variables. 
     You can have equality constraints ($g(x) = 0$), or inequality constraints ($h(x) < 0$). 
     Both are broadly handled the same way, though there are some slight differences. 
@@ -322,7 +322,7 @@
 
         Inequality constraints are tricky because they may or may not actually constrain the final solution. 
         If your final answer is constrained, inequality constraints actually behave just like an equality constraints. 
-        However, if the overall optimum exited at a point where, for example, g=1000 then the inequality constraint actually had no impact on the solution at all! 
+        However, if the overall optimum exited at a point where, for example, g=1000, then the inequality constraint actually had no impact on the solution at all! 
 
         We can introduce a vector of slack variables, $\xi$, to the inequality constraints to convert them into equality constraints: 
         \begin{table}[H]
@@ -357,11 +357,11 @@
         So, to avoid this situation we need to find another way to constrain $\xi$. 
 
         Take another look at the $\lambda \xi$ term in Equation~\eqref{eq:L_ineq}. 
-        Since $\xi$ is a free variable which must be less than 0 then we could set $\xi=-\infty$ and then $\mathcal{L}=-\infty$
+        Since $\xi$ is a free variable which must be less than 0, we could set $\xi=-\infty$ and then $\mathcal{L}=-\infty$
         . 
         This is obviously a degenerate solution that we want to avoid, so to exclude it we can see that if $\xi \ne 0$ then $\lambda = 0$. 
         Similarly, $\lambda$ is also a free variable so that if it $\lambda\ne0$, then $\xi=0$. 
-        So, in order to avoid these degenerate solution with $\mathcal{L}=-\infty$, we must enforce what is called the complementary slackness condition: 
+        So, in order to avoid these degenerate solutions with $\mathcal{L}=-\infty$, we must enforce what is called the complementary slackness condition: 
         \begin{equation}
             \lambda \xi = 0 \ , 
         \end{equation}
@@ -379,22 +379,22 @@
     This forms a system of equations that can be solved using nonlinear solution techniques, such as Newton's method. 
 
     In reality, not many numerical optimization algorithms actually directly solve this nonlinear system because it requires too much work to compute the Hessian. 
-    None the less, even if an optimizer does not directly solve this system of nonlinear equations it is still searching for solutions to it. 
+    None the less, even if an optimizer does not directly solve this system of nonlinear equations, it is still searching for solutions to it. 
     Hence, we have gone over this material so that you can understand how an optimizer sees the problem you are posing to it. 
 
     \section{Taking Derivatives of Outputs of Implicit Functions}
     \label{sec:taking_derivs_of_implicit_functions}
 
-    We have seen how gradient-based optimization can create a system of implicit equations by taking derivatives of the objective function and constraints and we've also discussed briefly how Newton's method could be used to solve that system of equations, if you were willing to compute the actual Hessian matrix.
-    If you do not wish to form the exact Hessian, then many gradient based optimization algorithms exist that don't require it, 
+    We have seen how gradient-based optimization can create a system of implicit equations by taking derivatives of the objective function and constraints. We've also discussed briefly how Newton's method could be used to solve that system of equations, if you were willing to compute the actual Hessian matrix.
+    If you do not wish to form the exact Hessian, then many gradient-based optimization algorithms exist that don't require it, 
     but they all will still require derivatives of the objective function and constraints with respect to the design variables. 
 
-    Up to this point all the examples that we've considered provided the objective and constraint functions as explicit functions. 
+    Up to this point, all the examples that we've considered provided the objective and constraint functions as explicit functions. 
     In other words, we say that the objective, $f$, can be computed directly by evaluating the function $F(x)$. 
     Inherent in that description of the function is the idea that there is an exact, analytic solution for $F$ given any value of $x$. 
     While this situation is certainly true for simple polynomial expressions, and also for some kinds of more complex engineering analyses, 
     the reality is that the vast majority of modern engineering computations include implicit calculations. 
-    For example CFD and FEA are implicit and turbine engine cycle analysis is highly implicit. 
+    For example, CFD and FEA are implicit and turbine engine cycle analysis is highly implicit. 
     Tools such as COMSOL, a popular multiphysics solver, is also implicit in nature. 
 
     A general implicit function can be represented as 
