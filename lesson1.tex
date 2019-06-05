@@ -178,7 +178,10 @@
     r = \mathcal{R}(x_1, x_2) = 0 \ . 
     \end{equation}
     It is implicit because you do not explicitly compute the values $x_1$ and $x_2$, but rather we solve the residual equation and when that solution is found we also know the desired values. 
-
+    Conversely, an \textbf{explicit function} is one where you can directly compute your objective through $F(x_1, x_2)$, for example. 
+    You can then isolate $x_1$ or $x_2$ to directly solve for them as well. 
+    You can represent any explicit function in an implicit form like that above, but the reverse is not necessarily true.
+    The way you compute derivatives of implicit functions for the gradient is very different from how you would do so for explicit functions; we'll revisit this later when discussing gradient calculations.
 
     Equation~\eqref{eq:linear_deriv} can be re-arranged into a linear system of equations: 
     \begin{equation}
@@ -196,7 +199,7 @@
         \end{bmatrix} \ .
     \end{equation}
     We can now solve this linear system by inverting the matrix on the left hand side, to find the values of $x_1$ and $x_2$ that will minimize the original paraboloid objective function.
-    For this specific case, with a parabolic objective function, it turns out the there is also an explicit form for the nonlinear system of equations needed to find the minimum. %confused about this
+    For this specific case, with a parabolic objective function, it turns out the there is also an explicit form for the nonlinear system of equations needed to find the minimum. 
 
     What if the objective function is cubic though? 
     \begin{equation}
@@ -208,7 +211,7 @@
         \frac{\partial f}{\partial x_2} &= x_1^2 + 2(x_2 + 4.0) = 0 \ .
     \end{align}
     Since this system of equations is nonlinear, we can no longer represent it in a simple matrix form and solve it with a simple matrix inverse. 
-    This had two important consequences. 
+    This has two important consequences. 
     First, since this system of equations is now second order we know that there will be two roots which means there are two minimum values. 
     Also, and perhaps more importantly, we now need to employ a nonlinear solution technique to find those roots. 
     For a simple problem like this, perhaps you can find the roots by hand using substitution. 
