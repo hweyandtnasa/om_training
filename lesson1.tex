@@ -569,10 +569,56 @@ You can find the roots for any general implicit system of nonlinear equations,by
         that ensures that one or the other of the two variables must be 0. 
         The complimentary slackness condition gives us an additional $N_g$ equations, which means we now have a well-defined problem formulation that can be solved to find minima: 
         \begin{align}
-            G(x) &= 0 \\
-            \frac{dF}{dx} - \lambda \frac{dG}{dx} &= 0 \\
+            G(x) &= 0 \notag \\
+            \frac{dF}{dx} - \lambda \frac{dG}{dx} &= 0 \notag \\
             \lambda \xi &= 0
+            \label{eq:almost_kkt}
         \end{align}
+
+    \subsection{Scaling for Optimization Problems}
+
+    Equation~\eqref{eq:almost_kkt} gives us a general set of equations that, when solved, will provide the local optimum for any general continuous problem. 
+    The tick then becomes to solve these equations, and while there are many different techniques to do that, the equations themselves can help us understand how to make that as easy as possible for those various techniques. 
+    This brings us to the topic of scaling for optimization problems. 
+    The goal of {}scaling is to make it easier to solve Equation~\eqref{eq:almost_kkt}, by making sure that all the unknown variables have roughly the same influence on the solution space. 
+
+    We see the term $G(x)$ showing up, along with $\lambda$, $\xi$, $dF/dx$, and $dG/dx$. 
+    So as a rough rule of thumb, we can say that its our goal to make sure that all of these terms are within 2-3 orders of magnitude of each other. 
+    One way to do that is by scaling the design variables ($x$) and/or the objective ($F$) and constraint ($G$) functions. 
+    So lets define some scaled versions of these functions, where the $\hat{()}$ indicates a scaled quantity.
+    We'll use a reference value for each quantity that provides the physical value that should be normalized to 1. 
+    \begin{align}
+        \hat{x} &= \frac{x}{\text{ref}_x} \label{eq:scale_x}\\
+        \hat{F}(\hat{x}) &= \frac{F(\hat{x} \cdot \text{ref}_x)}{\text{ref}_F} \label{eq:scale_F}\\
+        \hat{G}(\hat{x}) &= \frac{G(\hat{x} \cdot \text{ref}_x)}{\text{ref}_G} \label{eq:scale_G}
+    \end{align}
+    Equations~\eqref{eq:scale_x}, \eqref{eq:scale_F}, \eqref{eq:scale_G} are now the ones that we'll show to our optimizer. 
+    So the nonlinear set of equations that the optimize seeks to solve is now: 
+    \begin{align}
+        \hat{G}(\hat{x}) &= 0 \notag \\
+        \frac{d\hat{F}}{d\hat{x}} - \lambda \frac{d\hat{G}}{d\hat{x}} &= 0 \notag \\
+        \lambda \xi &= 0
+        \label{eq:almost_kkt}
+    \end{align}
+
+    So how do our three reference values ($\text{ref}_x, \text{ref}_F, \text{ref}_G$) affect these equations? 
+    For $\hat{G}(\hat{x})$, the answer is quite strait forward; 
+    Equation~\eqref{eq:scale_G} tells us that $\text{ref}_G$ directly affects the magnitude of the scaled constraint equations. 
+    What about for the $d \hat{F}/d\hat{x}$ term? 
+    \begin{align}
+        \frac{d\hat{F}}{d\hat{x}} &= \frac{dF}{dx} \frac{dx}{d\hat{x}} \frac{d\hat{F}}{dF} \notag \\
+        \frac{d\hat{F}}{d\hat{x}} &= \frac{dF}{dx} \left(\text{ref}_x \right) \left(\frac{1}{\text{ref}_F}\right) \ .
+    \end{align}
+    Similarly for $d \hat{G}/d\hat{x}$, 
+    \begin{align}
+        \frac{d\hat{G}}{d\hat{x}} &= \frac{dG}{dx} \frac{dx}{d\hat{x}} \frac{d\hat{G}}{dG} \notag \\
+        \frac{d\hat{G}}{d\hat{x}} &= \frac{dG}{dx} \left(\text{ref}_x \right) \left(\frac{1}{\text{ref}_G}\right) \ .
+    \end{align}
+    So that means that $\text{ref}_x$ and $\text{ref}_F$ both have opposite effects on the actual derivative value that the optimizer will see. 
+    If you increase $\text{ref}_x$, you will increase the size of both $d\hat{F}/d\hat{x}$ and $d\hat{F}/d\hat{x}$ relative to that of $\hat{G}(\hat{x})$. 
+    This would bias the solution path toward minimizing the objective function, instead of satisfying the constraints. 
+    
+
 
 
     \subsection{Summary}
