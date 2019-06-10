@@ -27,7 +27,6 @@ Optimizers deal with under-defined systems of equations (more unknowns and equat
 Nonlinear solvers find solutions to well defined **implicit functions** of one or more variables
         - You're obviously very familiar with explicit functions: f = F(x)
         - You've almost certainly worked with some implicit functions too: R(x,y) = 0
-
 You can change any explicit function into an implicit form: 
     - y = F(x) = 3x**2 - ln(x)
     - 0 = R(x,y) = 3x**2 - ln(x) - y = R(x,y)

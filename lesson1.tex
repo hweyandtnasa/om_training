@@ -23,31 +23,84 @@
 
 \begin{document}
 
-\title{Introduction to Optimization with OpenMDAO}
+\title{Mathematical Foundations of Systems Analysis and Optimization}
 \author{Justin Gray}
 
 \maketitle
+
+
+\section{Introduction}
+    Traditionally most practitioners would consider ``systems analysis'' and ``multidisciplinary optimization'' to be separate disciplines. 
+    However, at their respective mathematical cores, both disciplines are built on top of the same foundation: 
+    the manipulation of and techniques for solving nonlinear systems of implicit equations in order to use them for design and understanding of complex interactions.
+
+    The primary goal of this lesson is to provide you an introduction to this mathematical foundation, 
+    so that you can leverage the various tools and techniques more effectively. 
+    It is not critical that you are able to re-derive all of the equations presented here, nor is everything presented in complete detail. 
+    Rather, you should focus on understanding the broad concepts presented and how they relate to the type of work you'll be asked to do as a 
+    systems analyst or optimization expert. 
+
 
 \section{History of Optimization}
 
 
 \noindent Though formal optimization theory is quite old, what we think of today as "optimization" is a fairly young discipline that emerged with the development of general purpose computing. 
 
-    \begin{itemize}[itemsep=1.2em, label={}, itemindent=-3em]
+    \begin{itemize}[itemsep=1.2em, label={}, itemindent=-2.9em]
+        \item 1740: British mathematician Thomas Simpson described the modern form of a multivariate \textit{Newton's Method} in ``Essays on Several Curious and Useful Subjects, in Speculative and Mix'd Mathematicks'', pointing out its usefulness for solving optimization problems. 
         \item 1857: J. W. Gibbs shows that chemical equilibrium is attained when the energy is a minimum
         \item 1939: William Karush derives the necessary conditions for the inequality constrained problem in his Masters thesis. Harold Kuhn and Albert Tucker rediscover these conditions an publish their seminal  
             paper in 1951. These became known as the Karush–Kuhn–Tucker (KKT) conditions.
         \item 1959: Davidon develops the first quasi-Newton method for solving nonlinear optimization problems. Fletcher and Powell publish further developments in 1963.
         \item 1963: Wilson invents the sequential quadratic programming method for the first time. Han reinvents it in 1975 and Powell does the same in 1977.
         \item 1975: John Holland proposed the first genetic algorithm.
-        \item 1977: Raphael Haftka publishes one of the first multidisciplinary design optimization (MDO) ap- plications, 
-                in a paper entitled “Optimization of flexible wing structures subject to strength and induced drag constraints”[CITE].
+        \item 1977: Raphael Haftka publishes one of the first multidisciplinary design optimization (MDO) applications, 
+                in a paper entitled “Optimization of flexible wing structures subject to strength and induced drag constraints”.
         \item 1984: Narendra Karmarkar starts the age of interior point methods by proposing a more efficient algorithm for solving linear problems. In a particular application in communications network optimization, the solution time was reduced from weeks to days, enabling faster business and policy decisions. Karmarkar’s algorithm stimulated the development of several other interior point methods, some of which are used in current codes for solving linear programs.
         \item 1985: The first conference in MDO, the Multidisciplinary Analysis and Optimization (MA\&O) conference, takes place.
         \item 1995: Kennedy and Eberhart propose the particle swarm optimization algorithm
     \end{itemize}
 
-    \subsection*{Why do we need optimization and what does ``gradient-based'' mean?}
+    \subsection{The Advent of Multidisciplinary Optimization}
+
+    The field of study known as Multidisciplinary Optimization (MDO) --- sometimes called Multidisciplinary Design Analysis and Optimization (MDAO) --- grew out of the aerospace industry in the 1970's, 
+    where there was a growing realization that multiple different subsystems in the aircraft interacted strongly with eachother and that accounting for that interaction was necessary for good design. 
+
+    The classic application (see Hafka's 1977 paper) was for the aerostructural design of aircraft wings. 
+    You can build a much lighter wing if you can account for its deflection in flight, rather than designing it to be rigid. 
+    MDO has grown into a broad research field, with extensive research that leverages both gradient-free and gradient-based optimization. 
+
+    It is through the developments of gradient-based MDO that the deep connection between systems analysis and MDO becomes most readily apparent. 
+    Starting in the 1990's there were a series of increasing generalizations that broadened the applicability of gradient-based MDO: 
+
+    \begin{itemize}[itemsep=1.2em, label={}, itemindent=-2.9em]
+        \item 1990: Sobieski developed the global sensitivity equations which enabled computation of analytic derivatives across arbitrary coupled models
+        \item 1993: Evin Cramer published the Individual Design Feasible optimization architecture to solve MDO problems without direct coupling
+        \item 2005: Joaquim Martins develops the ``coupled adjoint'' approach for optimizing coupled high-fidelity analyses (i.e. CFD + FEA)
+        \item 2013: Joaquim Martins and John Hwang develop the Unified Derivative Equation, unifying all the various different techniques for computing derivatives
+    \end{itemize}
+
+
+% \section{What is OpenMDAO and why would you use it?}
+
+%     MDAO stands for ``Multidisciplinary Design Analysis and Optimization'', though you may see ``Multidisciplinary Design Optimization'' (MDO) used interchangeably. 
+%     In 2008 the OpenMDAO project was originally conceived to develop an open-source computational framework to support the broad application of state-of-the-art gradient-free and gradient-based MDAO methods. 
+
+%     Today, OpenMDAO is a general purpose computing library that handles data-passing, parallel communication, and provides a library of efficient useful tools for general engineering model building and optimization. 
+%     The framework can integrate analyses across the fidelity spectrum and can work with both serial and distributed memory analysis tools such as CFD and FEA. 
+%     These capabilities make the framework a good platform for building complex models and generic modeling libraries on top of, and they provide all the needed functionality to make use of gradient-free optimization. 
+
+%     The most unique feature of OpenMDAO is its ability to automatically and efficiently compute derivatives across complex multi-disciplinary models. 
+%     No other tool offers the same level of flexibility and automation of implementation that OpenMDAO does. 
+%     This makes it possible for non-experts to employ the most efficient derivative computation techniques available today, thus dramatically lowering the activation energy required to make the best use of gradient-based optimization methods. 
+
+%     So, while OpenMDAO has many useful features employing for gradient-free methods, what sets it apart is its support for gradient-based methods. 
+%     By employing gradient-based optimization with OpenMDAO you can take advantage of the 2-4 order of magnitude speed ups that are promised by researchers in the field, without actually having to become an expert. 
+
+%     In this lesson, we'll introduce some of the underlying theory for computing derivatives and you will see why it can be so challenging and labor intensive to do manually. 
+
+
+    \section{Why do we need optimization and what does ``gradient-based'' mean?}
         
         Optimization is a technique for finding solutions --- the design variables --- that maximize or minimize some quantity of interest  --- the objective function. 
         Fundamentally, the need for optimization arises when you are dealing with under-defined problems; you have more degrees of freedom than equations to constrain them with. 
@@ -112,23 +165,168 @@
             Despite the challenges associated with computing derivatives, the limitation to continuous design spaces, and the local nature of the algorithms, when properly implemented the performance of gradient-based methods is so great that it justifies their use even for relatively small optimization problems. 
             Gradient-based methods are the only class of optimization algorithms that can handle 1000's, 10,000's, or even 1,000,000's of design variables. 
 
-\section{What is OpenMDAO and why would you use it?}
 
-    MDAO stands for ``Multidisciplinary Design Analysis and Optimization'', though you may see ``Multidisciplinary Design Optimization'' (MDO) used interchangeably. 
-    In 2008 the OpenMDAO project was originally conceived to develop an open-source computational framework to support the broad application of state-of-the-art gradient-free and gradient-based MDAO methods. 
+\section{Introduction to Implicit Systems of Equations}
 
-    Today, OpenMDAO is a general purpose computing library that handles data-passing, parallel communication, and provides a library of efficient useful tools for general engineering model building and optimization. 
-    The framework can integrate analyses across the fidelity spectrum and can work with both serial and distributed memory analysis tools such as CFD and FEA. 
-    These capabilities make the framework a good platform for building complex models and generic modeling libraries on top of, and they provide all the needed functionality to make use of gradient-free optimization. 
+The mathematical foundations of both systems analysis and MDO are built on the ability to solve nonlinear, implicit systems of equations. 
+Implicit systems of equations are a collection of inter-related \textbf{implicit functions} that must be solved simultaneously. 
+These implicit functions are defined by residual equations, such as 
 
-    The most unique feature of OpenMDAO is its ability to automatically and efficiently compute derivatives across complex multi-disciplinary models. 
-    No other tool offers the same level of flexibility and automation of implementation that OpenMDAO does. 
-    This makes it possible for non-experts to employ the most efficient derivative computation techniques available today, thus dramatically lowering the activation energy required to make the best use of gradient-based optimization methods. 
+    \begin{equation} 
+    r = \mathcal{R}(x, y) = 0 \ . 
+    \label{equation}
+    \end{equation}
 
-    So, while OpenMDAO has many useful features employing for gradient-free methods, what sets it apart is its support for gradient-based methods. 
-    By employing gradient-based optimization with OpenMDAO you can take advantage of the 2-4 order of magnitude speed ups that are promised by researchers in the field, without actually having to become an expert. 
+Here $x$ is the vector the input variables and $y$ is the vector of implicit outputs of the function. 
+The length of $y$ will always be the same as the length of the the residual function $R$.
+For any given values of $x$, you must solve for the $y$ values that drive the residual to 0. 
+This is what makes the function ``implicit'', because there is no general analytic expression to solve for $y$. 
+Instead you implicitly find $y$ wherever $R=0$. 
 
-    In this lesson, we'll introduce some of the underlying theory for computing derivatives and you will see why it can be so challenging and labor intensive to do manually. 
+Although you've almost certainly run into implicit functions before, you're likely much more familiar with \textbf{explicit functions}. 
+Consider this example,  
+\begin{equation}
+    y = 3x^2 + 2x \ ,
+\end{equation}
+where you have a simple expression to directly compute $y$ given any value of $x$. 
+Explicit functions are much easier to work with, but unfortunately not every function can be represented explicitly. 
+Both types of functions have inputs and outputs, but the manner in which they compute the outputs is vastly different. 
+As we'll see the implicit form is more generally useful in for systems analysis and optimization. 
+Importantly, you can convert any explicit function into an implicit form by simply collecting all terms on one side of the equation:  
+\begin{equation}
+    R(x,y) =  3x^2 + 2x -y = 0\ . 
+\end{equation}
+
+Consider the example of the Mach-Area relationship for compressible, isentropic flow: 
+\begin{equation}
+    \frac{A}{A^*} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
+                    \frac{1}{MN} 
+                    \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}} \ ,
+                    \label{eq:mach_area}
+\end{equation}
+where $A$ is the flow area, $A^*$ critical flow area at Mach=1, $MN$ is the Mach number of the flow, and $\gamma$ is the ratio of specific heats that we'll assume to be a constant ($\gamma=1.4$ is a very good assumption except at really high temperatures).
+
+Equation~\eqref{eq:mach_area} is an explicit function that computes the area ratio $A/A^*$ directly, given any value for $MN$. 
+You can easily plot the relationship between the two --- check out the example code given in Figure~\ref{fig:mach-area}. 
+However, if we flip the question around and ask "For a given area ratio, what is the Mach number?" we will find that there is no longer an explicit relationship because there is no way to isolate $MN$ by itself. 
+\begin{figure}[H]
+    \centering
+    \lstinputlisting[language=Python]{mach_area.py}
+    \includegraphics[width=.75\textwidth]{mach_area.pdf}
+    \caption{Python code plotting the Mach-area relationship}
+    \label{fig:mach-area}
+\end{figure}
+
+So, if you wanted to solve for the Mach number that matches a given area ratio, you need to use a nonlinear solver. 
+In order to do that, you need to define a residual function that must be driven to 0: 
+\begin{equation}
+    R(\frac{A}{A^*}, MN) = \frac{A}{A^*} - \left[ \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
+                    \frac{1}{MN} 
+                    \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}}\right] = 0
+                    \label{eq:implicit_mach_area}
+\end{equation}
+Equation~\eqref{eq:implicit_mach_area} is literally just a re-arranging of Equation~\eqref{eq:mach_area} by moving the right hand side over to the left. 
+So they are exactly the same, but the implicit form is more useful since it can be solved for either area ratio or Mach number, while the explicit form can only be solved for area ratio. 
+Figure~\ref{fig:mach-area-implicit} give you a short bit of python code that can apply Newton's method to solve the implicit form of this equation. 
+Notice that the answer you get from Newton's method is dependent on the initial guess you give to the
+\begin{figure}[H]
+    \centering
+    \lstinputlisting[language=Python]{mach_area_solve.py}
+    \caption{Python code solving the implicit Mach-area equation using newton's method}
+    \label{fig:mach-area-implicit}
+\end{figure}
+
+The trick of re-arranging terms to form an implicit version from explicit function works for any general function.
+Hence we can generally say that all explicit functions have an implicit form, but not all implicit functions have an explicit form. 
+We're discussing this subtlety because internally and out of sight from the users, OpenMDAO represents all functions in their implicit form. 
+As a user you don't need to worry about this transformation --- it is managed automatically for you --- but the fact that it occurs becomes relevant when trying to understand how OpenMDAO computes derivatives across complex models.  
+So we'll revisit this subject a bit later. 
+
+
+\subsubsection*{Disguising an implicit function as an explicit one}
+Of more direct relevance to you as a user is that you can disguise an implicit function in an explicit form. 
+To be perfectly clear, this is \textbf{not} the same thing as converting an implicit function into an equivalent explicit form! 
+
+The word ``disguise'' is used very intentionally here. What you can do is put a black-box wrapper around an implicit function to make it look like an explicit one, even though the internal calculation is still being performed in an implicit way. 
+
+Lets go back to our example to see this in action, solving for Mach number when given an area ratio. 
+The implicit form is given in Equation~\ref{eq:implicit_mach_area}. 
+We're \textbf{not} going to change that at all. 
+However, if look at the code in Figure~\ref{eq:implicit_mach_area} you see that we can get solutions with a single call to the `newton' method. 
+Now, with a few more lines of code, we can wrap that whole process up into something that looks like a regular explicit function, as shown in Figure~\ref{fig:mach-area-fake-explicit}. 
+\begin{figure}[H]
+    \centering
+    \lstinputlisting[language=Python]{mach_area_fake_explicit.py}
+    \caption{Disguising an implicit function with an explicit wrapper}
+    \label{fig:mach-area-fake-explicit}
+\end{figure}
+
+Even though the functions look explicit now, they aren't really. 
+Why does this matter? 
+For one thing, if the function was really explicit then you would expect to be able to give it any allowable value for area ratio --- anything over 1.0 --- and expect to get an answer back. 
+However, if you experiment a bit with that function you'll see that the nonlinear solver isn't that stable. 
+It gets an answer for $A/A^*=3.0$, but not for $A/A^*=2.5$. 
+A second reason, which is especially important in the context of optimization, is that the way in which you need to compute derivatives across the function changes because of the implicitness. 
+We'll talk about this in more detail in the next sections. 
+
+
+\subsection*{Using Newton's method to solve implicit functions}
+
+Given a general implicit vector valued function, $R(x,y)$, we want to solve for the implicit output variables $y$ such that $R(x,y)=0$. 
+
+Lets look at taylor expansion of the vector valued residual equation for small variations in $y$: 
+\begin{equation}
+    R(x,y+\Delta y) = R(x,y) + \left[ \frac{\partial R}{\partial y} \right]_{x} \Delta y + \mathcal{O}( \Delta y^2)
+    \label{eq:newton_taylor}
+\end{equation}
+We seek solutions of the form $R(x,y)=0$, so finding $\Delta y$ such that $R(x,y+\Delta y)=0$ will also suffice. 
+
+Disregard the second order terms in Equation~\eqref{eq:newton_taylor},
+Then, by rearranging the remaining terms we get
+\begin{equation}
+    \left[ \frac{\partial R}{\partial y} \right]_{x} \Delta y = - R(x,y) + \mathcal{O}( \Delta y^2) \ .
+\end{equation}. 
+This nonlinear equation is not any more useful than the original Taylor expansion. 
+Yes, if we solved it we would know the exact $\Delta y$ that would drive $R(x,y)=0$, 
+but we still have no idea how to do that!
+However, by dropping the second order terms we get a simple linear system of equations that we can solve: 
+\begin{align}
+    \left[ \frac{\partial R}{\partial y} \right] \Delta y &= - R(x,y) \notag \\
+     \Delta y &= - \left[ \frac{\partial R}{\partial y} \right]^{-1} R(x,y)  \ .
+    \label{eq:Newton_method}
+\end{align}
+Equation~\eqref{eq:Newton_method} is called ``Newton's method''. 
+Because we dropped the higher order terms, this solution to this linear system is only an approximation to the roots of $R(x,y)$. 
+So, we can iteratively solve Equation~\eqref{eq:Newton_method} and apply the $\Delta y$ update until you reach a sufficient level of accuracy. 
+Also, since the terms we disregarded are of $\mathcal{O}( \Delta y^2)$, we know that Newton's method should exhibit second order convergence when near the true root. 
+
+
+For the implicit Mach-area relationship: 
+\begin{equation}
+    R(\frac{A}{A^*}, MN) = \frac{A}{A^*} - \left[ \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
+                    \frac{1}{MN} 
+                    \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}}\right] = 0
+                    \label{eq:implicit_mach_area}
+\end{equation}
+Newton's method would look as follows: 
+\begin{equation}
+    \frac{\partial R}{\partial MN} \Delta MN = -R(\frac{A}{A^*}, MN) \ .
+    \label{eq:mach_area_newton}
+\end{equation}
+Note that since the Mach-area residual has only the scalar $MN$ variable as an implicit output, so Equation~\eqref{eq:mach_area_newton} 
+is also a scalar equation in this case. 
+We can compute the necessary derivative analytically: 
+\begin{equation}
+    \frac{\partial R}{\partial MN} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
+    \left[\frac{1}{MN^2} \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}} - 
+       \frac{\gamma+1}{2(\gamma-1)}\left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)} - 1}(\gamma-1)
+    \right] 
+\end{equation}
+That is a fairly large equation, which highlights the reality that hand computing derivatives can get end up being a lot of work for large systems of arbitrary equations. 
+So its very common to approximate the partial derivative Jacobian using finite-differences. 
+We'll talk more about the various ways you can get the derivatives you need in further sections, 
+but the key here is to remember how Newton's method work. 
+You can find the roots for any general implicit system of nonlinear equations,by iteratively applying Equation~\eqref{eq:Newton_method}. 
 
 
 \section{Introduction to the Theory Behind Gradient-Based Optimization}
@@ -424,109 +622,7 @@
     So we have no explicit form for our constraint value, but we still need to compute derivatives of it with respect to the design variables. 
     In other words, we need to compute $\frac{du}{dt}$, when the only definition we have for $u$ is $R(t,u)=0$.
 
-    \subsection{Explicit vs Implicit Functions}
-    Before we dive into ways to compute the derivative of implicit functions, it is worth spending some time examining the difference between implicit and explicit and functions more closely. 
-    Both types of functions have inputs and outputs, but the manner in which they compute the outputs is vastly different. 
-    Moreover, any explicit function can be written in an equivalent implicit form but not all implicit functions have an equivalent explicit form. 
-
-    Consider the example of the Mach-Area relationship for compressible, isentropic flow: 
-    \begin{equation}
-        \frac{A}{A^*} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
-                        \frac{1}{MN} 
-                        \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}} \ ,
-                        \label{eq:mach_area}
-    \end{equation}
-    where $A$ is the flow area, $A^*$ critical flow area at Mach=1, $MN$ is the Mach number of the flow, and $\gamma$ is the ratio of specific heats that we'll assume to be a constant ($\gamma=1.4$ is a very good assumption except at really high temperatures).
-
-    Equation~\eqref{eq:mach_area} is an explicit function that computes the area ratio $A/A^*$ directly, given any value for $MN$. 
-    You can easily plot the relationship between the two --- check out the example code given in Figure~\ref{fig:mach-area}. 
-    However, if we flip the question around and ask "For a given area ratio, what is the Mach number?" we will find that there is no longer an explicit relationship because there is no way to isolate $MN$ by itself. 
-    \begin{figure}[H]
-        \centering
-        \lstinputlisting[language=Python]{mach_area.py}
-        \includegraphics[width=.75\textwidth]{mach_area.pdf}
-        \caption{Python code plotting the Mach-area relationship}
-        \label{fig:mach-area}
-    \end{figure}
-
-    So, if you wanted to solve for the Mach number that matches a given area ratio, you need to use a nonlinear solver. 
-    In order to do that, you need to define a residual function that must be driven to 0: 
-    \begin{equation}
-        R(\frac{A}{A^*}, MN) = \frac{A}{A^*} - \left[ \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
-                        \frac{1}{MN} 
-                        \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}}\right] = 0
-                        \label{eq:implicit_mach_area}
-    \end{equation}
-    Equation~\eqref{eq:implicit_mach_area} is literally just a re-arranging of Equation~\eqref{eq:mach_area} by moving the right hand side over to the left. 
-    So they are exactly the same, but the implicit form is more useful since it can be solved for either area ratio or Mach number, while the explicit form can only be solved for area ratio. 
-    Figure~\ref{fig:mach-area-implicit} give you a short bit of python code that can apply Newton's method to solve the implicit form of this equation. 
-    Notice that the answer you get from Newton's method is dependent on the initial guess you give to the
-    \begin{figure}[H]
-        \centering
-        \lstinputlisting[language=Python]{mach_area_solve.py}
-        \caption{Python code solving the implicit Mach-area equation using newton's method}
-        \label{fig:mach-area-implicit}
-    \end{figure}
-
-    The trick of re-arranging terms to form an implicit version from explicit function works for any general function.
-    Hence we can generally say that all explicit functions have an implicit form, but not all implicit functions have an explicit form. 
-    We're discussing this subtlety because internally and out of sight from the users, OpenMDAO represents all functions in their implicit form. 
-    As a user you don't need to worry about this transformation --- it is managed automatically for you --- but the fact that it occurs becomes relevant when trying to understand how OpenMDAO computes derivatives across complex models.  
-    So we'll revisit this subject a bit later. 
-
-
-    \subsubsection{Disguising an implicit function as an explicit one}
-    Of more direct relevance to you as a user is that you can disguise an implicit function in an explicit form. 
-    To be perfectly clear, this is \textbf{not} the same thing as converting an implicit function into an equivalent explicit form! 
-
-    The word ``disguise'' is used very intentionally here. What you can do is put a black-box wrapper around an implicit function to make it look like an explicit one, even though the internal calculation is still being performed in an implicit way. 
-
-    Lets go back to our example to see this in action, solving for Mach number when given an area ratio. 
-    The implicit form is given in Equation~\ref{eq:implicit_mach_area}. 
-    We're \textbf{not} going to change that at all. 
-    However, if look at the code in Figure~\ref{eq:implicit_mach_area} you see that we can get solutions with a single call to the `newton' method. 
-    Now, with a few more lines of code, we can wrap that whole process up into something that looks like a regular explicit function, as shown in Figure~\ref{fig:mach-area-fake-explicit}. 
-    \begin{figure}[H]
-        \centering
-        \lstinputlisting[language=Python]{mach_area_fake_explicit.py}
-        \caption{Disguising an implicit function with an explicit wrapper}
-        \label{fig:mach-area-fake-explicit}
-    \end{figure}
-
-    Even though the functions look explicit now, they aren't really. 
-    Why does this matter? 
-    For one thing, if the function was really explicit then you would expect to be able to give it any allowable value for area ratio --- anything over 1.0 --- and expect to get an answer back. 
-    However, if you experiment a bit with that function you'll see that the nonlinear solver isn't that stable. 
-    It gets an answer for $A/A^*=3.0$, but not for $A/A^*=2.5$. 
-    A second reason, which is especially important in the context of optimization, is that the way in which you need to compute derivatives across the function changes because of the implicitness. 
-    We'll talk about this in more detail in the next sections. 
-
-
-
-
-    % \subsection{Using Newton's method to solve implicit functions}
-
-    % Given a general implicit function, $r=R(x,y)$, we want to solve for the implicit output variables $y$ such that $r=0$. 
-    % A single iteration of Newton's method is given as: 
-    % \begin{equation}
-    %    \left[\frac{\partial \mathcal{R}}{\partial y} \right] \Delta y = -r \ ,
-    % \end{equation}
-    % and then we just iteratively apply this step till we reach sufficient convergence. 
-
-    % For the implicit Mach-area relationship: 
-    % \begin{equation}
-    %     R(\frac{A}{A^*}, MN) = \frac{A}{A^*} - \left[ \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
-    %                     \frac{1}{MN} 
-    %                     \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}}\right] = 0
-    %                     \label{eq:implicit_mach_area}
-    % \end{equation}
-    % we can compute the necessary derivative analytically: 
-    % \begin{equation}
-    %     \frac{\partial R}{\partial MN} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
-    %     \left[\frac{1}{MN^2} \left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)}} - 
-    %        \frac{\gamma+1}{2(\gamma-1)}\left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)} - 1}(\gamma-1)
-    %     \right] 
-    % \end{equation}
+    
 
     \subsection{Numerical approximation of derivatives}
     Numerical approximation of derivatives is by far the most common approach used by engineers in practice. 
