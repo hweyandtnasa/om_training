@@ -3,11 +3,11 @@ import matplotlib.pylab as plt
 
 gamma = 1.4
 
-gp1 = gamma+1 
+gp1 = gamma+1
 gm1 = gamma-1
 
-def area_ratio(MN): 
-    return (gp1/2)**(gp1/(2*gm1)) * (1 + gm1/2*MN**2)**(gp1/(2*gm1)) / MN 
+def area_ratio(MN):
+    return (gp1/2)**-(gp1/(2*gm1)) * (1 + gm1/2*MN**2)**(gp1/(2*gm1)) / MN 
 
 
 if __name__ == "__main__":
