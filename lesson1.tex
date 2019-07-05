@@ -581,7 +581,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
             \label{eq:almost_kkt}
         \end{align}
 
-    \subsection{Scaling for Optimization Problems}
+    \subsection{Scaling for Optimization Problems: The Linear Case}
 
     Equation~\eqref{eq:almost_kkt} gives us a general set of equations that, when solved, will provide the local optimum for any general continuous problem. 
     The tick then becomes to solve these equations, and while there are many different techniques to do that, the equations themselves can help us understand how to make that as easy as possible for those various techniques. 
@@ -591,12 +591,12 @@ You can find the roots for any general implicit system of nonlinear equations,by
     We see the term $G(x)$ showing up, along with $\lambda$, $\xi$, $dF/dx$, and $dG/dx$. 
     So as a rough rule of thumb we can say that its our goal to make sure that all of these terms are within 2-3 orders of magnitude of each other. 
     One way to do that is by scaling the design variables ($x$) and/or the objective ($F$) and constraint ($G$) functions. 
-    So lets define some scaled versions of these functions, where the $\hat{()}$ indicates a scaled quantity.
-    We'll use a reference value for each quantity that provides the physical value that should be normalized to 1. 
+    So lets define some scaled versions of these functions, where $\hat{()}$ indicates a scaled quantity. 
+    We'll use a reference value for each quantity that provides the physical value that should be normalized to 1. The scaling equations\footnote{The equations for $\hat{F}$ and $\hat{G}$ are \textit{}} are as follows:
     \begin{align}
-        \hat{x} &= x \cdot \text{ref}_x^{-1} \label{eq:scale_x}\\
-        \hat{F}(\hat{x}) &= \frac{F(x \cdot \text{ref}_x^{-1})}{\text{ref}_F} \label{eq:scale_F}\\
-        \hat{G}(\hat{x}) &= \frac{G(x \cdot \text{ref}_x^{-1})}{\text{ref}_G} \label{eq:scale_G}
+        \hat{x} &= \frac{x}{\text{ref}_x} \label{eq:scale_x}\\
+        \hat{F}(\hat{x}) &= \frac{F(x)}{\text{ref}_F} \label{eq:scale_F}\\
+        \hat{G}(\hat{x}) &= \frac{G(x)}{\text{ref}_G} \label{eq:scale_G}
     \end{align}
     Equations~\eqref{eq:scale_x}, \eqref{eq:scale_F}, \eqref{eq:scale_G} are now the ones that we'll show to our optimizer. 
     So the nonlinear set of equations that the optimize seeks to solve is now: 
@@ -627,6 +627,37 @@ You can find the roots for any general implicit system of nonlinear equations,by
 
 
 
+	\subsection{Affine Scaling Transformations}
+	In the scaling transformation above, each variable and function is associated with one reference value, which is precisely the variable value that scales to 1 in the transformation. Furthermore, the general relationship between an unscaled variable or function value $X$ and its scaled counterpart is simply
+	\begin{align}
+		X = \text{ref}_X * \hat{X}
+	\end{align}
+	What if, however, you wanted to modify the transformation to \textit{shift} the scaled result, and make \textit{that} your scaling transformation? The result would be an \textit{affine scaling transformation}, which requires not one, but two reference values for each entity. For this purpose, OpenMDAO stores for each variable a "ref" value--the variable value that scales to 1--as well as a "ref0" value--the variable value that scales to 0:
+	\begin{align}
+		\text{ref} &\mapsto 1 \\
+		\text{ref0} &\mapsto 0
+	\end{align}
+	The scaling equations are then as follows:
+	\begin{align}
+	\hat{x} &= \frac{x}{\text{ref}_x - \text{ref0}_x} - \frac{\text{ref0}_x}{\text{ref}_x - \text{ref0}_x} \label{eq:aff_scale_x}\\
+	\hat{F}(\hat{x}) &= \frac{F(x)}{\text{ref}_x - \text{ref0}_x} - \frac{\text{ref0}_x}{\text{ref}_x - \text{ref0}_x} \label{eq:aff_scale_F}\\
+	\hat{G}(\hat{x}) &= \frac{G(x)}{\text{ref}_x - \text{ref0}_x} - \frac{\text{ref0}_x}{\text{ref}_x - \text{ref0}_x} \label{eq:aff_scale_G}
+	\end{align}
+	Notice that if $\text{ref0}=0$ (which is the default value) then these equations are equivalent to the linear case. Thus $\text{ref0}$ represents zero shift in the scaled value under the affine scaling transformation.
+	The scaled and unscaled differentials of $x$, $F$ and $G$ are then given by
+	\begin{align}
+		d\hat{x} &= \frac{1}{\text{ref}_x - \text{ref0}_x} dx \\
+		d\hat{F}(\hat{x}) &= \frac{1}{\text{ref}_F - \text{ref0}_F} dF(x) \\
+		d\hat{G}(\hat{x}) &= \frac{1}{\text{ref}_G - \text{ref0}_G} dG(x)
+	\end{align}
+	so that the derivatives in the affine-scaled problem are
+	\begin{align}
+		\frac{d\hat{F}}{d\hat{x}} &= \frac{\text{ref}_x-\text{ref0}_x}{\text{ref}_F-\text{ref0}_F} \frac{dF}{dx} \\
+		\frac{d\hat{G}}{d\hat{x}} &= \frac{\text{ref}_x-\text{ref0}_x}{\text{ref}_G-\text{ref0}_G} \frac{dG}{dx}
+	\end{align}
+	
+	
+	
     \subsection{Summary}
     Gradient-based optimization transforms an under-defined problem into a well-defined implicit function that can be solved using nonlinear solution methods by taking derivatives of the Lagrangian function and setting the resulting equations equal to 0. 
     This forms a system of equations that can be solved using nonlinear solution techniques, such as Newton's method. 
