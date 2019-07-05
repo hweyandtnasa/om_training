@@ -30,11 +30,11 @@
 
 
 \section{Introduction}
-    Traditionally most practitioners would consider ``systems analysis'' and ``multidisciplinary optimization'' to be separate disciplines. 
+    Traditionally, most practitioners would consider ``systems analysis'' and ``multidisciplinary optimization'' to be separate disciplines. 
     However, at their respective mathematical cores, both disciplines are built on top of the same foundation: 
     the manipulation of and techniques for solving nonlinear systems of implicit equations in order to use them for design and understanding of complex interactions.
 
-    The primary goal of this lesson is to provide you an introduction to this mathematical foundation, 
+    The primary goal of this lesson is to provide an introduction to this mathematical foundation, 
     so that you can leverage the various tools and techniques more effectively. 
     It is not critical that you are able to re-derive all of the equations presented here, nor is everything presented in complete detail. 
     Rather, you should focus on understanding the broad concepts presented and how they relate to the type of work you'll be asked to do as a 
@@ -48,7 +48,7 @@
 
     \begin{itemize}[itemsep=1.2em, label={}, itemindent=-2.9em]
         \item 1740: British mathematician Thomas Simpson described the modern form of a multivariate \textit{Newton's Method} in ``Essays on Several Curious and Useful Subjects, in Speculative and Mix'd Mathematicks'', pointing out its usefulness for solving optimization problems. 
-        \item 1857: J. W. Gibbs shows that chemical equilibrium is attained when the energy is a minimum
+        \item 1857: J. W. Gibbs shows that chemical equilibrium is attained when the energy is a minimum.
         \item 1939: William Karush derives the necessary conditions for the inequality constrained problem in his Masters thesis. Harold Kuhn and Albert Tucker rediscover these conditions an publish their seminal  
             paper in 1951. These became known as the Karush–Kuhn–Tucker (KKT) conditions.
         \item 1959: Davidon develops the first quasi-Newton method for solving nonlinear optimization problems. Fletcher and Powell publish further developments in 1963.
@@ -58,7 +58,7 @@
                 in a paper entitled “Optimization of flexible wing structures subject to strength and induced drag constraints”.
         \item 1984: Narendra Karmarkar starts the age of interior point methods by proposing a more efficient algorithm for solving linear problems. In a particular application in communications network optimization, the solution time was reduced from weeks to days, enabling faster business and policy decisions. Karmarkar’s algorithm stimulated the development of several other interior point methods, some of which are used in current codes for solving linear programs.
         \item 1985: The first conference in MDO, the Multidisciplinary Analysis and Optimization (MA\&O) conference, takes place.
-        \item 1995: Kennedy and Eberhart propose the particle swarm optimization algorithm
+        \item 1995: Kennedy and Eberhart propose the particle swarm optimization algorithm.
     \end{itemize}
 
     \subsection{The Advent of Multidisciplinary Optimization}
@@ -74,10 +74,10 @@
     Starting in the 1990's there were a series of increasing generalizations that broadened the applicability of gradient-based MDO: 
 
     \begin{itemize}[itemsep=1.2em, label={}, itemindent=-2.9em]
-        \item 1990: Sobieski developed the global sensitivity equations which enabled computation of analytic derivatives across arbitrary coupled models
-        \item 1993: Evin Cramer published the Individual Design Feasible optimization architecture to solve MDO problems without direct coupling
-        \item 2005: Joaquim Martins develops the ``coupled adjoint'' approach for optimizing coupled high-fidelity analyses (i.e. CFD + FEA)
-        \item 2013: Joaquim Martins and John Hwang develop the Unified Derivative Equation, unifying all the various different techniques for computing derivatives
+        \item 1990: Sobieski developed the global sensitivity equations which enabled computation of analytic derivatives across arbitrary coupled models.
+        \item 1993: Evin Cramer published the Individual Design Feasible optimization architecture to solve MDO problems without direct coupling.
+        \item 2005: Joaquim Martins develops the ``coupled adjoint'' approach for optimizing coupled high-fidelity analyses (i.e. CFD + FEA).
+        \item 2013: Joaquim Martins and John Hwang develop the Unified Derivative Equation, unifying all the various different techniques for. computing derivatives.
     \end{itemize}
 
 
@@ -108,11 +108,11 @@
         Examples: 
         \begin{itemize}
             \item Find the minimum value of a parabola
-            \item Find the angle of attack and chord length needed to get a 5 Newtons of lift for a NACA 0012 airfoil
+            \item Find the angle of attack and chord length needed to get 5 Newtons of lift for a NACA 0012 airfoil
         \end{itemize}
 
         The objective function provides a means of distinguishing one solution from another, 
-        and thus by seeking the max or min of the objective you have fundamentally converted an under-defined problem into a well defined one. 
+        and thus by seeking the max or min of the objective you have fundamentally converted an under-defined problem into a well-defined one. 
 
         All optimizers perform this task, though they do so in a variety of different ways. 
         There are three main classes of optimization algorithms: 
@@ -155,7 +155,7 @@
             Recent research has shown that for problems with over 100 design variables, gradient-based methods are 2-4 orders of magnitude faster than gradient-free methods. 
             The improved computational performance is the primary motivation for using gradient-based optimization algorithms. 
             
-            Of course, there is no free lunch! The downside to using gradient-based optimization algorithm is that it can be quite difficult to compute the gradients that you need. 
+            Of course, there is no free lunch! The downside to using gradient-based optimization algorithms is that it can be quite difficult to compute the gradients that you need. 
             All of the promised performance of gradient-based methods falls apart if you can not compute accurate derivative information in a computationally efficient manner. 
             It is also important to note that, since the definition of a derivative fundamentally assumes a continuous function and a continuous design space, these methods can only work on continuous problems. 
 
@@ -228,7 +228,7 @@ In order to do that, you need to define a residual function that must be driven 
 Equation~\eqref{eq:implicit_mach_area} is literally just a re-arranging of Equation~\eqref{eq:mach_area} by moving the right hand side over to the left. 
 So they are exactly the same, but the implicit form is more useful since it can be solved for either area ratio or Mach number, while the explicit form can only be solved for area ratio. 
 Figure~\ref{fig:mach-area-implicit} give you a short bit of python code that can apply Newton's method to solve the implicit form of this equation. 
-Notice that the answer you get from Newton's method is dependent on the initial guess you give to the
+Notice that the answer you get from Newton's method is dependent on the initial guess that you give.
 \begin{figure}[H]
     \centering
     \lstinputlisting[language=Python]{mach_area_solve.py}
@@ -274,7 +274,7 @@ We'll talk about this in more detail in the next sections.
 
 Given a general implicit vector valued function, $R(x,y)$, we want to solve for the implicit output variables $y$ such that $R(x,y)=0$. 
 
-Lets look at taylor expansion of the vector valued residual equation for small variations in $y$: 
+Lets look at a Taylor expansion of the vector-valued residual equation for small variations in $y$: 
 \begin{equation}
     R(x,y+\Delta y) = R(x,y) + \left[ \frac{\partial R}{\partial y} \right]_{x} \Delta y + \mathcal{O}( \Delta y^2)
     \label{eq:newton_taylor}
@@ -332,7 +332,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
 \section{Introduction to the Theory Behind Gradient-Based Optimization}
 
     \subsection{Unconstrained Optimization}
-    Consider a simple parabolic function of one variable: less
+    Consider a simple parabolic function of one variable:
     \begin{equation}
         f = F(x_1) = (x_1 - 3)^2 + x_1 - 3 \ . 
     \end{equation}
@@ -362,7 +362,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
         f = F(x_1,x_2) = (x_1 - 3)^2 + x_1 x_2 + (x_2 + 4.0)^2 - 3 \ . 
     \end{equation}
 
-    Since it is still parabolic we know that there is still only one minimum. 
+    Since it is still parabolic, we know that there is still only one minimum. 
     $f$ is still a scalar, but now the input is 2 scalars: $x_1$ and $x_2$
     To find the minimum, we take the derivative of $f$ with respect to the two $x$ variables and set the result equal to 0. 
     Because there are two inputs, we get a system of two equations instead of a single equation. 
@@ -477,7 +477,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
         Our previous technique for minimizing a function will not work here, because the derivatives of the objective function do not take the constraints into account at all. 
         But we can modify the problem a bit in order to take both the objective and the constraints into account by forming what is called the Lagrangian:  
         \begin{equation}
-            \mathcal{L}(x, \lambda) = F(x) - \lambda H(x) \ .
+            \mathcal{L}(x) = F(x) - \lambda H(x) \ .
         \end{equation}
         The Lagrangian condenses the constrained optimization problem, which was composed of multiple separate equations, back into a single scalar equation which we can apply our existing derivative based technique to! 
         In order to do this, we've introduced a new set of unknown variables, $\lambda$, to the problem --- one for each equality constraint we want to consider. 
@@ -494,8 +494,8 @@ You can find the roots for any general implicit system of nonlinear equations,by
 
         Lets differentiate the Lagrangian with respect to all the unknown variables ($\lambda$ and $x$) and set the equations equal to 0: 
         \begin{alignat}{3}
-            \frac{\partial \mathcal{L}}{\partial \lambda} &= H(x) &&= 0 \label{eq:dLdlambda} \\
-            \frac{\partial \mathcal{L}}{\partial x} &= \frac{dF}{dx} - \lambda \frac{dH}{dx} &&= 0 \label{eq:dLdx}
+            \frac{d\mathcal{L}}{d\lambda} &= H(x) &&= 0 \label{eq:dLdlambda} \\
+            \frac{d\mathcal{L}}{dx} &= \frac{dF}{dx} - \lambda \frac{dH}{dx} &&= 0 \label{eq:dLdx}
         \end{alignat}
         Because of Equation~\eqref{eq:dLdlambda}, solutions to this system of equations which clearly have to satisfy the equality constraints. 
         Equation~\eqref{eq:dLdx} is what actually minimizes the Lagrangian.
@@ -504,8 +504,6 @@ You can find the roots for any general implicit system of nonlinear equations,by
         In total, this gives us $N_h + N_x$ equations, for which we need an equal number of degrees of freedom. 
         This is why the Lagrange multipliers are necessary to be able to solve constrained optimization problems. 
         Without them, the system of equations you get from differentiating the Lagrangian would be over-defined. 
-
-        To solve 
 
 
         \subsubsection{Inequality constraints: $g = G(x) \ge 0$}
@@ -539,8 +537,8 @@ You can find the roots for any general implicit system of nonlinear equations,by
         For this modification to be valid, we need to ensure that $\xi$ always takes on whatever value is necessary to enforce the constraint if it is active, but if the constraint is inactive then $\xi$ should have no impact on the solution. 
         It is not obvious that things will work out this way from the given formulation, but luckily they do once we form the Lagrangian. 
         \begin{align}
-            \mathcal{L}(x,lambda,\xi) &= F(x) - \lambda(G(x) + \xi) \notag \\
-                               &= F(x) - \lambda G(x) - \lambda \xi \label{eq:L_ineq}
+            \mathcal{L}(x,\xi) &= F(x) + \lambda(G(x) + \xi) \notag \\
+                               &= F(x) + \lambda(G(x)) + \lambda \xi \label{eq:L_ineq}
         \end{align}
 
         Similar to before, we can take derivatives of the Lagrangian with respect to $x$ and $lambda$, which will yield 
@@ -549,34 +547,28 @@ You can find the roots for any general implicit system of nonlinear equations,by
         In other words, we don't have any equations to constrain the values for the slack variables, so we can not yet solve for solutions that minimize the Lagrangian. 
 
         You might be tempted to simply differentiate with respect to $\xi$, since thats what we have done in all the previous cases. 
-        But, a quick look shows that will not give us a general equation to constrain the value of $\xi$:
+        But, a quick look shows that this will not work.
         \begin{equation}
-            \frac{\partial \mathcal{L}}{\partial \xi} = \lambda \label{eq:dL_dxi}
+            \frac{d\mathcal{L}}{d\xi} = \lambda \label{eq:dL_dxi}
         \end{equation}
-        The only way for Equation~\eqref{eq:dL_dxi} to equal zero is if $\lambda=0$ all the time, which is not what we need. 
-        Rather than adding an additional equation to constrain $\xi$, this additional equation would actually remove the necessary additional degree of freedom that $\lambda$ introduced in the first place. 
-        From a mathematical perspective, avoiding this equation means that we are explicitly not going to be minimizing the Lagrangian with respect to $\xi$. 
-        Rather, we must view $\xi$ as an additional degree of freedom needed to balance things out, but not one that may take any value. 
+        The only way for Equation~\eqref{eq:dL_dxi} to equal zero is if $\lambda=0$, which is not at all what we want. 
+        Rather than adding an additional equation to constraint $\xi$, instead our additional equation has actually removed the necessary additional degree of freedom that $\lambda$ introduced in the first place. 
+        So, to avoid this situation we need to find another way to constrain $\xi$. 
 
-
-        Take another look at the $-\lambda \xi$ term in Equation~\eqref{eq:L_ineq}. 
-        Since we want to minimize $\mathcal{L}$ with respect to $\lambda$ this would drive $\lambda$ toward $\infty$. 
-        This is obviously a degenerate solution that we want to avoid, so we can add a restriction that if $\lambda$ is non-zero, then 
-        $\xi$ must be 0. 
-        Interestingly, $\xi=0$ is the condition for which the inequality constraint becomes active and hence should behave like an equality constraint. 
-        What about the situation where the inequality constraint is inactive? 
-        In that case, $\xi \ne 0$, so in order to keep the $-\lambda \xi$ from blowing up the Lagrangian, we must force $\lambda=0$. 
-        Basically, we want to ensure that for all cases either $\xi=0$ or $\lambda=0$, but never both. 
-
-        We can achieve that by the following equation: 
+        Take another look at the $\lambda \xi$ term in Equation~\eqref{eq:L_ineq}. 
+        Since $\xi$ is a free variable which must be less than 0, we could set $\xi=-\infty$ and then $\mathcal{L}=-\infty$
+        . 
+        This is obviously a degenerate solution that we want to avoid, so to exclude it we can see that if $\xi \ne 0$ then $\lambda = 0$. 
+        Similarly, $\lambda$ is also a free variable so that if it $\lambda\ne0$, then $\xi=0$. 
+        So, in order to avoid these degenerate solutions with $\mathcal{L}=-\infty$, we must enforce what is called the complementary slackness condition: 
         \begin{equation}
             \lambda \xi = 0 \ , 
         \end{equation}
-        which is referred to as the complementary slackness condition. 
+        that ensures that one or the other of the two variables must be 0. 
         The complimentary slackness condition gives us an additional $N_g$ equations, which means we now have a well-defined problem formulation that can be solved to find minima: 
         \begin{align}
-            \frac{\partial \mathcal{L}}{\partial \lambda} = G(x) + \xi &= 0 \notag \\
-            \frac{\partial \mathcal{L}}{\partial x} = \frac{dF}{dx} - \lambda \frac{dG}{dx} &= 0 \notag \\
+            G(x) &= 0 \notag \\
+            \frac{dF}{dx} - \lambda \frac{dG}{dx} &= 0 \notag \\
             \lambda \xi &= 0
             \label{eq:almost_kkt}
         \end{align}
@@ -601,7 +593,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
     Equations~\eqref{eq:scale_x}, \eqref{eq:scale_F}, \eqref{eq:scale_G} are now the ones that we'll show to our optimizer. 
     So the nonlinear set of equations that the optimize seeks to solve is now: 
     \begin{align}
-        \hat{G}(\hat{x}) + \xi &= 0 \notag \\
+        \hat{G}(\hat{x}) &= 0 \notag \\
         \frac{d\hat{F}}{d\hat{x}} - \lambda \frac{d\hat{G}}{d\hat{x}} &= 0 \notag \\
         \lambda \xi &= 0
         \label{eq:almost_kkt}
@@ -623,7 +615,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
     So that means that $\text{ref}_x$ and $\text{ref}_F$ both have opposite effects on the actual derivative value that the optimizer will see. 
     If you increase $\text{ref}_x$, you will increase the size of both $d\hat{F}/d\hat{x}$ and $d\hat{F}/d\hat{x}$ relative to that of $\hat{G}(\hat{x})$. 
     This would bias the solution path toward minimizing the objective function, instead of satisfying the constraints. 
-
+    
 
 
 
@@ -828,7 +820,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
     However, for complex implicit functions like CFD or FEA you might not be able (or at least might not want to) actually compute the inverse for $\partial R/\partial y$. 
     In these cases, there are iterative linear solvers (e.g. Krylov methods) which can solve the linear system for you. 
     These methods scale to the larger problems that a CFD solver poses, but they are also more expensive. 
-    In these cases, you can roughly approximate the cost of a linear solve to be the same as that of the non-linear solve. 
+    In these cases, you can roughly approximate the cost of a linear solve to be the same as that of the nonlinear solve. 
     So in this situation, the computational scaling of this approach requires one linear solve per design variable which we are assuming to be roughly equivalent in cost to one nonlinear function evaluation. 
     So this approach, similar to FD and complex-step methods, also scales linearly with the number of design variables. 
 
