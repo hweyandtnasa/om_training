@@ -592,7 +592,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
     So as a rough rule of thumb we can say that its our goal to make sure that all of these terms are within 2-3 orders of magnitude of each other. 
     One way to do that is by scaling the design variables ($x$) and/or the objective ($F$) and constraint ($G$) functions. 
     So lets define some scaled versions of these functions, where $\hat{()}$ indicates a scaled quantity. 
-    We'll use a reference value for each quantity that provides the physical value that should be normalized to 1. The scaling equations\footnote{The equations for $\hat{F}$ and $\hat{G}$ are \textit{}} are as follows:
+    We'll use a reference value for each quantity that provides the physical value that should be normalized to 1. The scaling equations are as follows:
     \begin{align}
         \hat{x} &= \frac{x}{\text{ref}_x} \label{eq:scale_x}\\
         \hat{F}(\hat{x}) &= \frac{F(x)}{\text{ref}_F} \label{eq:scale_F}\\
