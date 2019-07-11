@@ -47,13 +47,13 @@
 \noindent Though formal optimization theory is quite old, what we think of today as "optimization" is a fairly young discipline that emerged with the development of general purpose computing. 
 
     \begin{itemize}[itemsep=1.2em, label={}, itemindent=-2.9em]
-        \item 1740: British mathematician Thomas Simpson described the modern form of a multivariate \textit{Newton's Method} in ``Essays on Several Curious and Useful Subjects, in Speculative and Mix'd Mathematicks'', pointing out its usefulness for solving optimization problems. 
+        \item 1740: British mathematician Thomas Simpson describes the modern form of a multivariate \textit{Newton's Method} in ``Essays on Several Curious and Useful Subjects, in Speculative and Mix'd Mathematicks'', pointing out its usefulness for solving optimization problems. 
         \item 1857: J. W. Gibbs shows that chemical equilibrium is attained when the energy is a minimum.
-        \item 1939: William Karush derives the necessary conditions for the inequality constrained problem in his Masters thesis. Harold Kuhn and Albert Tucker rediscover these conditions an publish their seminal  
+        \item 1939: William Karush derives the necessary conditions for the inequality constrained problem in his Masters thesis. Harold Kuhn and Albert Tucker rediscover these conditions and publish their seminal  
             paper in 1951. These became known as the Karush–Kuhn–Tucker (KKT) conditions.
         \item 1959: Davidon develops the first quasi-Newton method for solving nonlinear optimization problems. Fletcher and Powell publish further developments in 1963.
         \item 1963: Wilson invents the sequential quadratic programming method for the first time. Han reinvents it in 1975 and Powell does the same in 1977.
-        \item 1975: John Holland proposed the first genetic algorithm.
+        \item 1975: John Holland proposes the first genetic algorithm.
         \item 1977: Raphael Haftka publishes one of the first multidisciplinary design optimization (MDO) applications, 
                 in a paper entitled “Optimization of flexible wing structures subject to strength and induced drag constraints”.
         \item 1984: Narendra Karmarkar starts the age of interior point methods by proposing a more efficient algorithm for solving linear problems. In a particular application in communications network optimization, the solution time was reduced from weeks to days, enabling faster business and policy decisions. Karmarkar’s algorithm stimulated the development of several other interior point methods, some of which are used in current codes for solving linear programs.
@@ -77,28 +77,8 @@
         \item 1990: Sobieski developed the global sensitivity equations which enabled computation of analytic derivatives across arbitrary coupled models.
         \item 1993: Evin Cramer published the Individual Design Feasible optimization architecture to solve MDO problems without direct coupling.
         \item 2005: Joaquim Martins develops the ``coupled adjoint'' approach for optimizing coupled high-fidelity analyses (i.e. CFD + FEA).
-        \item 2013: Joaquim Martins and John Hwang develop the Unified Derivative Equation, unifying all the various different techniques for. computing derivatives.
+        \item 2013: Joaquim Martins and John Hwang develop the Unified Derivative Equation, unifying all the various different techniques for computing derivatives.
     \end{itemize}
-
-
-% \section{What is OpenMDAO and why would you use it?}
-
-%     MDAO stands for ``Multidisciplinary Design Analysis and Optimization'', though you may see ``Multidisciplinary Design Optimization'' (MDO) used interchangeably. 
-%     In 2008 the OpenMDAO project was originally conceived to develop an open-source computational framework to support the broad application of state-of-the-art gradient-free and gradient-based MDAO methods. 
-
-%     Today, OpenMDAO is a general purpose computing library that handles data-passing, parallel communication, and provides a library of efficient useful tools for general engineering model building and optimization. 
-%     The framework can integrate analyses across the fidelity spectrum and can work with both serial and distributed memory analysis tools such as CFD and FEA. 
-%     These capabilities make the framework a good platform for building complex models and generic modeling libraries on top of, and they provide all the needed functionality to make use of gradient-free optimization. 
-
-%     The most unique feature of OpenMDAO is its ability to automatically and efficiently compute derivatives across complex multi-disciplinary models. 
-%     No other tool offers the same level of flexibility and automation of implementation that OpenMDAO does. 
-%     This makes it possible for non-experts to employ the most efficient derivative computation techniques available today, thus dramatically lowering the activation energy required to make the best use of gradient-based optimization methods. 
-
-%     So, while OpenMDAO has many useful features employing for gradient-free methods, what sets it apart is its support for gradient-based methods. 
-%     By employing gradient-based optimization with OpenMDAO you can take advantage of the 2-4 order of magnitude speed ups that are promised by researchers in the field, without actually having to become an expert. 
-
-%     In this lesson, we'll introduce some of the underlying theory for computing derivatives and you will see why it can be so challenging and labor intensive to do manually. 
-
 
     \section{Why do we need optimization and what does ``gradient-based'' mean?}
         
@@ -163,41 +143,65 @@
             In other words, gradient-based methods are very efficient at climbing whatever hill the initial guess has started them on, but they will not search any other hills even if they might have taller peaks. 
 
             Despite the challenges associated with computing derivatives, the limitation to continuous design spaces, and the local nature of the algorithms, when properly implemented the performance of gradient-based methods is so great that it justifies their use even for relatively small optimization problems. 
-            Gradient-based methods are the only class of optimization algorithms that can handle 1000's, 10,000's, or even 1,000,000's of design variables. 
+            Gradient-based methods are the only class of optimization algorithms that can handle thousands, tens of thousands, or even millions of design variables. 
 
 
 \section{Introduction to Implicit Systems of Equations}
 
+\subsection{Explicit and Implicit Functions}
+
+There are two types of functions, with respect to how their defining equations relate inputs to outputs: explicit functions and implicit functions. 
+
+An \textbf{explicit function} is one in which each output is isolated on one side of its own defining equation, being equated to an expression strictly of inputs on the other side. For example, the function with real input $x$ and real output $y$ defined by the equation $y = x^2$ is explicit, since the output $y$ is isolated on the left-hand side and the right-hand side is strictly an expression of the input $x$. To put it another way, the key property of an explicit function is that all outputs are separated from all inputs and each other in the defining equations. An output from an explicit function is called an \textit{explicit output}.
+
+Any well-defined function that is not explicit is called an \textbf{implicit function}. In an implicit function, there is at least one designated output variable "mixed in" with other inputs and/or outputs---that is, there is at least one output that does not have its own defining equation in which it is isolated on one side and equated to an expression strictly of inputs. For example, if we were to flip the roles of $x$ and $y$ in the previous example so that $y$ were \textit{input} and $x$ were \textit{output}, the resulting function would be implicit---with defining equation $x^2 = y$---because, even though output $x$ does has its own defining equation, it is not in fact \textit{isolated} on either side, instead nested within the squaring operator. An output from an implicit function is called an \textit{implicit output}.
+
+Notice how the function defined by $x^2 = y$ (with input $y$ and output $x$) is \textit{not} the same as that defined by $x = \sqrt{y}$ (with the same input and output), at the very least because the former is implicit and the latter is explicit. Thus, whether a function is explicit or implicit depends upon the particular formulation of its defining equations.
+
+Speaking of particular formulations of defining equations, there are standards that ought to be adhered to when laying out the equations for explicit and implicit functions. Let $x \equiv [x_1,x_2,...,x_m]^T$ be a vector of inputs and let $y \equiv [y_1,y_2,...,y_n]^T$ be a vector of outputs. It is convention to write the defining equations for an explicit function as a system of the form
+\begin{equation}
+    y = F(x)
+\end{equation}
+where $F$ is some function.
+For an implicit function, all variables are to be moved to the same side of the defining equations so that we can write the equations as
+\begin{equation}
+    R(x,y) = 0
+\end{equation}
+for some function $R$. Such an $R$ is called a \textbf{residual function}, and any particular value $r$ of $R$ is called a \textbf{residual}.
+
+\subsection{Implicit Systems of Equations}
+
 The mathematical foundations of both systems analysis and MDO are built on the ability to solve nonlinear, implicit systems of equations. 
-Implicit systems of equations are a collection of inter-related \textbf{implicit functions} that must be solved simultaneously. 
-These implicit functions are defined by residual equations, such as 
-
+An \textbf{implicit system of equations} is a collection of inter-related implicit functions that must be solved simultaneously. 
+These implicit functions are defined by \textit{residual equations}, such as 
     \begin{equation} 
-    r = \mathcal{R}(x, y) = 0 \ . 
-    \label{equation}
+    r = R(x, y) = 0     
+    \label{eq:res_eq} 
     \end{equation}
+where $x=[x_1,x_2,...,x_m]^T$ is the input vector and $y=[y_1,y_2,...,y_n]^T$ is the implicit output vector of the function.
 
-Here $x$ is the vector the input variables and $y$ is the vector of implicit outputs of the function. 
-The length of $y$ will always be the same as the length of the the residual function $R$.
-For any given values of $x$, you must solve for the $y$ values that drive the residual to 0. 
-This is what makes the function ``implicit'', because there is no general analytic expression to solve for $y$. 
-Instead you implicitly find $y$ wherever $R=0$. 
+In any well-defined function, implicit or explicit, there is a single defining equation for each output. Therefore, the length $n$ of $y$ will always be the same as the length of $R$, i.e. the number of individual residual function components.
 
-Although you've almost certainly run into implicit functions before, you're likely much more familiar with \textbf{explicit functions}. 
-Consider this example,  
-\begin{equation}
-    y = 3x^2 + 2x \ ,
-\end{equation}
-where you have a simple expression to directly compute $y$ given any value of $x$. 
-Explicit functions are much easier to work with, but unfortunately not every function can be represented explicitly. 
-Both types of functions have inputs and outputs, but the manner in which they compute the outputs is vastly different. 
-As we'll see the implicit form is more generally useful in for systems analysis and optimization. 
-Importantly, you can convert any explicit function into an implicit form by simply collecting all terms on one side of the equation:  
-\begin{equation}
-    R(x,y) =  3x^2 + 2x -y = 0\ . 
-\end{equation}
+Since implicit systems do not have the benefit of defining their outputs as explicit functions of inputs, optimizers must solve implicit systems by "driving the residual to 0"---namely, by somehow computing $x,y$ such that Equation \eqref{eq:res_eq} holds. With this difficulty in mind, why should we even bother working with implicit systems? 
 
-Consider the example of the Mach-Area relationship for compressible, isentropic flow: 
+First of all, we generally have no choice! While all explicit functions $y=F(x)$ can be reformulated as implicit functions $R(x,y) \equiv y-F(x) = 0$, not all implicit functions can be made explicit.
+Consider, for instance, the explicit function of scalar input $x$ with scalar output $y$ given by
+\begin{equation*}
+    y = F(x) \equiv 3x^2 + 2x
+\end{equation*}
+This is an explicit function, but it can be reformulated as an implicit function by subtracting the right-hand side from the output on the left:
+\begin{equation*}
+    R(x,y) \equiv y - F(x) = y - (3x^2 + 2x) = 0
+\end{equation*}
+However, if instead we had an implicit function
+\begin{equation*}
+    y e^y = x^3y - 1
+\end{equation*}
+then there is no way to reformulate this as an explicit function since y cannot be solved for in the equation. This means that, given an input x, we cannot simply "plug and chug" into the equation to compute the output y! A solver routine is required.
+
+The second reason for using implicit systems of equations is that, as we will see later, the implicit form of a function is generally more useful for systems analysis and optimization. Much of this usefulness stems from the way gradients are computed for implicit functions, which is very different from how you would do so for explicit functions. We'll revisit this later when discussing gradient calculations.
+
+To illustrate how these concepts apply to aeronautics, let us look at the Mach-Area relationship for compressible, isentropic flow: 
 \begin{equation}
     \frac{A}{A^*} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} 
                     \frac{1}{MN} 
@@ -206,7 +210,7 @@ Consider the example of the Mach-Area relationship for compressible, isentropic 
 \end{equation}
 where $A$ is the flow area, $A^*$ critical flow area at Mach=1, $MN$ is the Mach number of the flow, and $\gamma$ is the ratio of specific heats that we'll assume to be a constant ($\gamma=1.4$ is a very good assumption except at really high temperatures).
 
-Equation~\eqref{eq:mach_area} is an explicit function that computes the area ratio $A/A^*$ directly, given any value for $MN$. 
+Equation~\eqref{eq:mach_area} is an \textit{explicit} function that computes the area ratio $A/A^*$ directly, given any value for $MN$. 
 You can easily plot the relationship between the two --- check out the example code given in Figure~\ref{fig:mach-area}. 
 However, if we flip the question around and ask "For a given area ratio, what is the Mach number?" we will find that there is no longer an explicit relationship because there is no way to isolate $MN$ by itself. 
 \begin{figure}[H]
@@ -238,12 +242,13 @@ Notice that the answer you get from Newton's method is dependent on the initial 
 
 The trick of re-arranging terms to form an implicit version from explicit function works for any general function.
 Hence we can generally say that all explicit functions have an implicit form, but not all implicit functions have an explicit form. 
-We're discussing this subtlety because internally and out of sight from the users, OpenMDAO represents all functions in their implicit form. 
+We're discussing this subtlety because internally and out of sight from the users, \textit{OpenMDAO represents all functions in their implicit form}. 
 As a user you don't need to worry about this transformation --- it is managed automatically for you --- but the fact that it occurs becomes relevant when trying to understand how OpenMDAO computes derivatives across complex models.  
 So we'll revisit this subject a bit later. 
 
 
-\subsubsection*{Disguising an implicit function as an explicit one}
+\subsection{Disguising Implicit Functions as Explicit Functions}
+
 Of more direct relevance to you as a user is that you can disguise an implicit function in an explicit form. 
 To be perfectly clear, this is \textbf{not} the same thing as converting an implicit function into an equivalent explicit form! 
 
@@ -270,7 +275,7 @@ A second reason, which is especially important in the context of optimization, i
 We'll talk about this in more detail in the next sections. 
 
 
-\subsection*{Using Newton's method to solve implicit functions}
+\subsection{Using Newton's Method to Solve Implicit Functions}
 
 Given a general implicit vector valued function, $R(x,y)$, we want to solve for the implicit output variables $y$ such that $R(x,y)=0$. 
 
@@ -284,21 +289,21 @@ We seek solutions of the form $R(x,y)=0$, so finding $\Delta y$ such that $R(x,y
 Disregard the second order terms in Equation~\eqref{eq:newton_taylor},
 Then, by rearranging the remaining terms we get
 \begin{equation}
-    \left[ \frac{\partial R}{\partial y} \right]_{x} \Delta y = - R(x,y) + \mathcal{O}( \Delta y^2) \ .
-\end{equation}. 
+    \left[ \frac{\partial R}{\partial y} \right]_{x} \Delta y = - R(x,y) + \mathcal{O}( \Delta y^2)
+\end{equation} 
 This nonlinear equation is not any more useful than the original Taylor expansion. 
 Yes, if we solved it we would know the exact $\Delta y$ that would drive $R(x,y)=0$, 
 but we still have no idea how to do that!
 However, by dropping the second order terms we get a simple linear system of equations that we can solve: 
 \begin{align}
     \left[ \frac{\partial R}{\partial y} \right] \Delta y &= - R(x,y) \notag \\
-     \Delta y &= - \left[ \frac{\partial R}{\partial y} \right]^{-1} R(x,y)  \ .
+     \Delta y &= - \left[ \frac{\partial R}{\partial y} \right]^{-1} R(x,y)
     \label{eq:Newton_method}
 \end{align}
-Equation~\eqref{eq:Newton_method} is called ``Newton's method''. 
-Because we dropped the higher order terms, this solution to this linear system is only an approximation to the roots of $R(x,y)$. 
-So, we can iteratively solve Equation~\eqref{eq:Newton_method} and apply the $\Delta y$ update until you reach a sufficient level of accuracy. 
-Also, since the terms we disregarded are of $\mathcal{O}( \Delta y^2)$, we know that Newton's method should exhibit second order convergence when near the true root. 
+Equation~\eqref{eq:Newton_method} is called \textbf{Newton's method}. 
+Because we dropped the higher order terms, the solution to this linear system is only an approximation to the roots of $R(x,y)$. 
+However, we can iteratively solve Equation~\eqref{eq:Newton_method} and apply the $\Delta y$ update until we reach a sufficient level of accuracy. 
+Also, since the terms we disregarded are of $\mathcal{O}( \Delta y^2)$, we know that Newton's method should exhibit second-order convergence when near the true root. In other words, the error of the approximation decreases quadratically as our step size decreases.
 
 
 For the implicit Mach-area relationship: 
@@ -310,7 +315,7 @@ For the implicit Mach-area relationship:
 \end{equation}
 Newton's method would look as follows: 
 \begin{equation}
-    \frac{\partial R}{\partial MN} \Delta MN = -R(\frac{A}{A^*}, MN) \ .
+    \frac{\partial R}{\partial MN} \Delta MN = -R(\frac{A}{A^*}, MN)
     \label{eq:mach_area_newton}
 \end{equation}
 Note that since the Mach-area residual has only the scalar $MN$ variable as an implicit output, so Equation~\eqref{eq:mach_area_newton} 
@@ -322,11 +327,11 @@ We can compute the necessary derivative analytically:
        \frac{\gamma+1}{2(\gamma-1)}\left( 1 + \frac{\gamma-1}{2}MN^2 \right)^{\frac{\gamma+1}{2(\gamma-1)} - 1}(\gamma-1)
     \right] 
 \end{equation}
-That is a fairly large equation, which highlights the reality that hand computing derivatives can get end up being a lot of work for large systems of arbitrary equations. 
-So its very common to approximate the partial derivative Jacobian using finite-differences. 
+That is a fairly large equation, which highlights the reality that hand computing derivatives can end up being a lot of work for large systems of arbitrary equations. 
+So it is very common to approximate the partial derivative Jacobian using finite-differences. 
 We'll talk more about the various ways you can get the derivatives you need in further sections, 
-but the key here is to remember how Newton's method work. 
-You can find the roots for any general implicit system of nonlinear equations,by iteratively applying Equation~\eqref{eq:Newton_method}. 
+but the key here is to remember how Newton's method works. 
+You can find the roots for any general implicit system of nonlinear equations by iteratively applying Equation~\eqref{eq:Newton_method}. 
 
 
 \section{Introduction to the Theory Behind Gradient-Based Optimization}
@@ -334,10 +339,10 @@ You can find the roots for any general implicit system of nonlinear equations,by
     \subsection{Unconstrained Optimization}
     Consider a simple parabolic function of one variable:
     \begin{equation}
-        f = F(x_1) = (x_1 - 3)^2 + x_1 - 3 \ . 
+        f = F(x_1) = (x_1 - 3)^2 + x_1 - 3
     \end{equation}
     If I asked you to ``find the value of $f$'', then you have an under-defined problem. 
-    There is an infinite number of solutions for $f$, corresponding to the infinite number of values that $x_1$ can take. 
+    There are an infinite number of solutions for $f$, corresponding to the infinite number of values that $x_1$ can take. 
     If instead, I ask you to ``find the minimum of value $f$'', you now have a well-defined problem.    
     The formal optimization problem statement for this would be: 
 
@@ -351,37 +356,26 @@ You can find the roots for any general implicit system of nonlinear equations,by
     \end{table}
 
 
-    Since this function is parabolic, we know that there is one and only one minimum for all values of $x_1$. 
+    Since this function is parabolic and opening upward, we know that there is one and only one minimum for all values of $x_1$. 
     From basic calculus, we know that we can find the minimum of $f$ by taking the derivative and setting the resulting expression equal to 0. 
     \begin{equation}
-        \frac{\partial f}{\partial x_1} = 2(x_1 - 3) + 1 = 0 \ . 
+        \frac{\partial f}{\partial x_1} = 2(x_1 - 3) + 1 = 0
     \end{equation}
 
-    Now lets look at a parabolic function of two variables: 
+    Now let's look at a parabolic function of two variables: 
     \begin{equation}
-        f = F(x_1,x_2) = (x_1 - 3)^2 + x_1 x_2 + (x_2 + 4.0)^2 - 3 \ . 
+        f = F(x_1,x_2) = (x_1 - 3)^2 + x_1 x_2 + (x_2 + 4.0)^2 - 3 
     \end{equation}
 
-    Since it is still parabolic, we know that there is still only one minimum. 
-    $f$ is still a scalar, but now the input is 2 scalars: $x_1$ and $x_2$
+    Since it is still parabolic and opening upward, we know that there is still only one minimum. 
+    $f$ is still a scalar, but now the input is two scalars $x_1,x_2$.
     To find the minimum, we take the derivative of $f$ with respect to the two $x$ variables and set the result equal to 0. 
-    Because there are two inputs, we get a system of two equations instead of a single equation. 
+    Because there are two inputs, we get a system of two equations instead of a single equation: 
     \begin{align}
         \frac{\partial f}{\partial x_1} &= 2(x_1 - 3) + x_2 = 0 \notag \\
         \frac{\partial f}{\partial x_2} &= x_1 + 2(x_2 + 4.0) = 0 \label{eq:linear_deriv}
     \end{align}
-    Now we can solve this system of equations for $x_1$ and $x_2$ to find the minimum of the original objective function. 
-    This is referred to as an \textbf{implicit function}, which would generally be represented as: 
-    \begin{equation} 
-    r = \mathcal{R}(x_1, x_2) = 0 \ . 
-    \end{equation}
-    It is implicit because you do not explicitly compute the values $x_1$ and $x_2$, but rather we solve the residual equation and when that solution is found we also know the desired values. 
-    Conversely, an \textbf{explicit function} is one where you can directly compute your objective through $F(x_1, x_2)$, for example. 
-    You can then isolate $x_1$ or $x_2$ to directly solve for them as well. 
-    You can represent any explicit function in an implicit form like that above, but the reverse is not necessarily true.
-    The way you compute derivatives of implicit functions for the gradient is very different from how you would do so for explicit functions; we'll revisit this later when discussing gradient calculations.
-
-    Equation~\eqref{eq:linear_deriv} can be re-arranged into a linear system of equations: 
+    Now we can solve this (implicit) system of equations for $x_1$ and $x_2$ to find the minimum of the original objective function. Notice how Equation~\eqref{eq:linear_deriv} can be re-arranged into a linear system of equations: 
     \begin{equation}
         \begin{bmatrix}
         2,1 \\
@@ -403,55 +397,56 @@ You can find the roots for any general implicit system of nonlinear equations,by
     \begin{equation}
         f = F(x_1,x_2) = (x_1 - 3)^2 + x_1^2 x_2 + (x_2 + 4.0)^2 - 3 \ . 
     \end{equation}
-    We made it cubic by modifying the cross term ($x_1^2 x_2$), and so now the system of equations to find the minimum will be: 
+    We made it cubic by changing the cross term $x_1 x_2$ into $x_1^2 x_2$, and so now the system of equations to find the minimum will be: 
     \begin{align}
         \frac{\partial f}{\partial x_1} &= 2(x_1 - 3) + 2 x_1 x_2 = 0 \notag \\
         \frac{\partial f}{\partial x_2} &= x_1^2 + 2(x_2 + 4.0) = 0 \ .
     \end{align}
     Since this system of equations is nonlinear, we can no longer represent it in a simple matrix form and solve it with a simple matrix inverse. 
     This has two important consequences. 
-    First, since this system of equations is now second order we know that there will be two roots which means there are two minimum values. 
+    First, since this system of equations is now second-order, we know that there will be two roots, which means there are two minimum values. 
     Also, and perhaps more importantly, we now need to employ a nonlinear solution technique to find those roots. 
-    For a simple problem like this, perhaps you can find the roots by hand using substitution. 
+    For this particular problem, perhaps you can find the roots by hand using substitution---although, generally, things are not that simple. 
 
-    What if your objective is a cubic function of 1000 variables? 
+    What if your objective is a cubic function of 1000 variables $x \equiv [x_1,x_2,...,x_{1000}]^T$? 
     \begin{equation}
-        f = F(x_1,x_2, ..., x_{1000}) = F(\bar{x}) \ . 
+        f = F(x_1,x_2, ..., x_{1000}) = F(x) 
     \end{equation}
     Now, to find the minima we will have to solve a nonlinear system of 1000 equations: 
     \begin{equation} 
-    r = \mathcal{R}(x_1, x_2, ...,  x_{1000}) =  \mathcal{R}(\bar{x}) = \frac{\partial f}{\partial \bar{x}} =  0 \ . 
+    r = R(x_1, x_2, ...,  x_{1000}) = R(x) = \frac{\partial f}{\partial x} = 0 
     \end{equation}
     This is far too large to solve by hand, but the implicit form of the equations can be solved using a numerical technique such as Newton's method. 
     Newton's method is composed of the iterative solution to the following equation: 
     \begin{equation}
-         \Delta \bar{x} = - \left[\frac{\partial \mathcal{R}}{\partial \bar{x}} \right]^{-1} \bar{r} \ , 
+         \Delta x = - \left[\frac{\partial R}{\partial x} \right]^{-1} r 
     \end{equation}
-    where $\left[\frac{\partial \mathcal{R}}{\partial x} \right]$ is a matrix of partial derivatives computed about some $\bar{x}^*$, $\left[\Delta x\right]$, $\bar{r}$ is the vector residual values computed at $\bar{x}^*$, and $\Delta \bar{x}$ is the update that should be applied to $\bar{x}^*$ for the next iteration. 
+    where $\left[\frac{\partial R}{\partial x} \right]$ is a matrix of partial derivatives computed about some $x^*$, $\left[\Delta x\right]$. The quantity $r$ is the \textit{vector} of residual values computed at $x^*$, and $\Delta x$ is the update that should be applied to $x^*$ for the next iteration. 
 
-    Note that we now need $\frac{\partial \mathcal{R}}{\partial \bar{x}}$, but $\mathcal{R}$ was itself defined as a partial derivative of $f$ with respect to $\bar{x}$. 
+    Note that we now need $\frac{\partial R}{\partial x}$, but $R$ was itself defined as a partial derivative of $f$ with respect to $x$. 
     So that means that we now need second-derivatives with respect to $f$: 
     \begin{equation}
-         \left[\frac{\partial \mathcal{R}}{\partial \bar{x}} \right] =  \left[\frac{\partial^2 f}{\partial \bar{x}^2} \right] \ . 
+         \left[\frac{\partial R}{\partial x} \right] =  \left[\frac{\partial^2 f}{\partial x^2} \right]
     \end{equation}
-    $\frac{\partial^2 f}{\partial \bar{x}^2}$ is called the Hessian matrix of $f$.
-    This is how, for an unconstrained optimization, we can create a well-defined problem (same number of unknowns as equations to constrain them) by taking derivatives of the objective function with respect to the design variables. 
+    The matrix $\frac{\partial^2 f}{\partial x^2}$ is called the \textbf{Hessian matrix}, or simply ''Hessian'', of $f$. It is square and symmetric, with the number of rows and columns equal to the length of $x$.
+    
+    And so, for an unconstrained optimization, we can create a well-defined problem (same number of unknowns as equations to constrain them) by taking derivatives of the objective function with respect to the design variables in the above manner. 
 
-    If the system of equations we get by taking those derivatives is nonlinear, then we need to use Newton's method to iteratively solve for roots that will minimize the objective.  
-    If $\bar{x}$ is a length 1000 vector, The Hessian of $f$ will be $1000 \times 1000$, 
+    If the system of equations we get by taking those derivatives is nonlinear, then we need to use Newton's method or some other nonlinear solver to iteratively solve for roots that will minimize the objective.
+    If $x$ is a vector of length 1000, The Hessian of $f$ will be $1000 \times 1000$, 
     so there are one million terms in the Hessian. 
-    We would need to derive a formula for each of those terms in order to implement Newton's method and solve the optimization problem. 
+    We would need to derive a formula for each of those terms in order to implement Newton's method and solve the optimization problem.
 
     Obviously, deriving one million equations isn't feasible. 
     For smaller problems, you could maybe compute the Hessian by hand --- in fact, this is what J.W. Gibbs did to solve for chemical equilibrium in 1857.
     However, for general problems, there is a suite of nonlinear optimization methods (e.g. sequential quadratic programming and interior point methods) that have been developed so that we either don't need the Hessian at all or don't have to explicitly compute it. 
-    Some optimization algorithms, called quasi-Newton methods, approximate the Hessian using only first derivative information.
+    Some optimization algorithms, called \textbf{quasi-Newton methods}, approximate the Hessian using only first-order derivative information.
 
-    So, while you most likely do not need to explicitly compute the Hessian, you still need to compute the first-derivatives of the objective function with respect to the design variables. 
-    So for 1000 variable unconstrained optimization, we would still need to derive 1000 formulas. 
+    Thus, while you most likely do not need to explicitly compute the Hessian, you still need to compute the first-derivatives of the objective function with respect to the design variables. 
+    So for 1000 variable unconstrained optimization we would still need to derive 1000 formulas. 
     This is certainly much more achievable, but clearly still a lot of work. 
 
-    \subsection{Constrained Optimizations}
+    \subsection{Constrained Optimization}
         
     Practically speaking, optimization problems are very rarely unconstrained. 
     Usually, you want to maximize or minimize an objective function, subject to some set of constraints. 
@@ -655,10 +650,10 @@ You can find the roots for any general implicit system of nonlinear equations,by
     This forms a system of equations that can be solved using nonlinear solution techniques, such as Newton's method. 
 
     In reality, not many numerical optimization algorithms actually directly solve this nonlinear system because it requires too much work to compute the Hessian. 
-    None the less, even if an optimizer does not directly solve this system of nonlinear equations, it is still searching for solutions to it. 
+    Nonetheless, even if an optimizer does not directly solve this system of nonlinear equations, it is still searching for solutions to it. 
     Hence, we have gone over this material so that you can understand how an optimizer sees the problem you are posing to it. 
 
-    \section{Taking Derivatives of Outputs of Implicit Functions}
+    \section{Taking Derivatives of Implicit Outputs}
     \label{sec:taking_derivs_of_implicit_functions}
 
     We have seen how gradient-based optimization can create a system of implicit equations by taking derivatives of the objective function and constraints. We've also discussed briefly how Newton's method could be used to solve that system of equations, if you were willing to compute the actual Hessian matrix.
@@ -857,7 +852,7 @@ You can find the roots for any general implicit system of nonlinear equations,by
 
 
 
-    \section{Taking derivatives of outputs of mixed implicit/explicit functions}
+    \section{Taking Derivatives of Outputs of Mixed Implicit/Explicit Functions}
 
     In real applications, your model is likely to be built from a mixture of implicit and explicit functions that are chained together.
     A really simple example of this would be if you wanted to optimize the thickness distribution of a beam subject to an end load to minimize the average deflection of the beam as predicted by an FEA model. 
