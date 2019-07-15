@@ -150,24 +150,30 @@
 
 \subsection{Explicit and Implicit Functions}
 
-There are two types of functions, with respect to how their defining equations relate inputs to outputs: explicit functions and implicit functions. 
+There are two types of functions, with respect to how their defining equations relate inputs to outputs: explicit functions and implicit functions.
 
-An \textbf{explicit function} is one in which each output is isolated on one side of its own defining equation, being equated to an expression strictly of inputs on the other side. For example, the function with real input $x$ and real output $y$ defined by the equation $y = x^2$ is explicit, since the output $y$ is isolated on the left-hand side and the right-hand side is strictly an expression of the input $x$. To put it another way, the key property of an explicit function is that all outputs are separated from all inputs and each other in the defining equations. An output from an explicit function is called an \textit{explicit output}.
-
-Any well-defined function that is not explicit is called an \textbf{implicit function}. In an implicit function, there is at least one designated output variable "mixed in" with other inputs and/or outputs---that is, there is at least one output that does not have its own defining equation in which it is isolated on one side and equated to an expression strictly of inputs. For example, if we were to flip the roles of $x$ and $y$ in the previous example so that $y$ were \textit{input} and $x$ were \textit{output}, the resulting function would be implicit---with defining equation $x^2 = y$---because, even though output $x$ does has its own defining equation, it is not in fact \textit{isolated} on either side, instead nested within the squaring operator. An output from an implicit function is called an \textit{implicit output}.
-
-Notice how the function defined by $x^2 = y$ (with input $y$ and output $x$) is \textit{not} the same as that defined by $x = \sqrt{y}$ (with the same input and output), at the very least because the former is implicit and the latter is explicit. Thus, whether a function is explicit or implicit depends upon the particular formulation of its defining equations.
-
-Speaking of particular formulations of defining equations, there are standards that ought to be adhered to when laying out the equations for explicit and implicit functions. Let $x \equiv [x_1,x_2,...,x_m]^T$ be a vector of inputs and let $y \equiv [y_1,y_2,...,y_n]^T$ be a vector of outputs. It is convention to write the defining equations for an explicit function as a system of the form
+Let $x \equiv [x_1,x_2,...,x_m]^T$ be a vector of inputs and let $y \equiv [y_1,y_2,...,y_n]^T$ be a vector of outputs. An \textbf{explicit function} is one that defines $y$ by an equation of the form
 \begin{equation}
-    y = F(x)
+y \equiv F(x)
 \end{equation}
-where $F$ is some function.
-For an implicit function, all variables are to be moved to the same side of the defining equations so that we can write the equations as
+where $F$ is some function. An output of an explicit function is called an \textit{explicit output}. Notice how the equation above is actually a \textit{system} of equations, with exactly one equation per explicit output. 
+
+For example, the function with real input $x$ and real output $y$ defined by the equation $y = x^2$ is explicit, since the output $y$ is isolated on the left-hand side and the right-hand side is strictly an expression of the input $x$.
+
+Any non-explicit function that is otherwise well-defined is called an \textbf{implicit function}. In the most general sense, the defining equations of implicit functions can be written as a system of the form
 \begin{equation}
-    R(x,y) = 0
+R(x,y) \equiv 0
 \end{equation}
-for some function $R$. Such an $R$ is called a \textbf{residual function}, and any particular value $r$ of $R$ is called a \textbf{residual}.
+for some function $R$. Such an $R$ is called a \textbf{residual function}, and any particular value $r$ of $R$ is called a \textbf{residual}. These equations \textit{implicitly define} $y$, which is the vector of \textit{implicit outputs}. There is one residual, and thus one equation, for each implicit output. 
+
+For example, the function with real input $x$ and real output $y$ defined by the equation $y^2 = x$ is implicit, since $y$ is not isolated.
+
+Notice how the function defined by $y^2 = x$ is \textit{not} the same as that defined by $y = \pm \sqrt{x}$, at the very least because the former is implicit and the latter is explicit. Thus, whether a function is explicit or implicit depends upon the particular formulation of its defining equations. It is standard form to write explicit and implicit systems in the forms given above.
+
+An important thing to remember is that any explicit function can be rewritten as an implicit function, but not all implicit functions can be rewritten as explicit functions! For instance, since OpenMDAO works fundamentally with implicit functions, it automatically converts user-defined explicit functions $y \equiv F(x)$ into implicit functions by subtracting the right-hand side from the left:
+\begin{equation}
+R(x,y) \equiv y - F(x) \equiv 0
+\end{equation}
 
 \subsection{Implicit Systems of Equations}
 
@@ -175,19 +181,17 @@ The mathematical foundations of both systems analysis and MDO are built on the a
 An \textbf{implicit system of equations} is a collection of inter-related implicit functions that must be solved simultaneously. 
 These implicit functions are defined by \textit{residual equations}, such as 
     \begin{equation} 
-    r = R(x, y) = 0     
+    r \equiv R(x, y) \equiv 0     
     \label{eq:res_eq} 
     \end{equation}
-where $x=[x_1,x_2,...,x_m]^T$ is the input vector and $y=[y_1,y_2,...,y_n]^T$ is the implicit output vector of the function.
-
-In any well-defined function, implicit or explicit, there is a single defining equation for each output. Therefore, the length $n$ of $y$ will always be the same as the length of $R$, i.e. the number of individual residual function components.
+where $x \equiv [x_1,x_2,...,x_m]^T$ is the input vector and $y \equiv [y_1,y_2,...,y_n]^T$ is the implicit output vector of the function.
 
 Since implicit systems do not have the benefit of defining their outputs as explicit functions of inputs, optimizers must solve implicit systems by "driving the residual to 0"---namely, by somehow computing $x,y$ such that Equation \eqref{eq:res_eq} holds. With this difficulty in mind, why should we even bother working with implicit systems? 
 
 First of all, we generally have no choice! While all explicit functions $y=F(x)$ can be reformulated as implicit functions $R(x,y) \equiv y-F(x) = 0$, not all implicit functions can be made explicit.
 Consider, for instance, the explicit function of scalar input $x$ with scalar output $y$ given by
 \begin{equation*}
-    y = F(x) \equiv 3x^2 + 2x
+    y \equiv F(x) \equiv 3x^2 + 2x
 \end{equation*}
 This is an explicit function, but it can be reformulated as an implicit function by subtracting the right-hand side from the output on the left:
 \begin{equation*}
@@ -195,7 +199,7 @@ This is an explicit function, but it can be reformulated as an implicit function
 \end{equation*}
 However, if instead we had an implicit function
 \begin{equation*}
-    y e^y = x^3y - 1
+    y e^y \equiv x^3y - 1
 \end{equation*}
 then there is no way to reformulate this as an explicit function since y cannot be solved for in the equation. This means that, given an input x, we cannot simply "plug and chug" into the equation to compute the output y! A solver routine is required.
 
@@ -668,7 +672,8 @@ You can find the roots for any general implicit system of nonlinear equations by
     For example, CFD and FEA are implicit and turbine engine cycle analysis is highly implicit. 
     Tools such as COMSOL, a popular multiphysics solver, is also implicit in nature. 
 
-    A general implicit function can be represented as 
+    A general \\
+     can be represented as 
     \begin{equation}
         R(x,y) = 0 \ , 
     \end{equation}
